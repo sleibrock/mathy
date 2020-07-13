@@ -1,5 +1,7 @@
 // src/calc/expr.rs
 
+use std::ops::{Add,Sub,Mul,Div,Neg};
+
 pub type E = Box<Expr>;
 
 
@@ -8,21 +10,15 @@ pub enum Expr {
     NaN,
     Const(f64),
     Var(char),
-
     Neg(E),
-
     Add(E, E),
     Sub(E, E),
     Mul(E, E),
     Div(E, E),
     Pow(E, E),
-
-    // trig funcs
     Sin(E),
     Cos(E),
     Tan(E),
-
-    // log/exp funcs
     Ln(E),
     Exp(E),
 }
@@ -36,6 +32,7 @@ impl Expr {
             _ => false,
         }
     }
+
     pub fn has_var(&self, s: char) -> bool {
         match self {
             Var(x)     => { s == *x },
@@ -55,14 +52,120 @@ impl Expr {
     }
 }
 
+// Boxing tools to size out recursive structures
 pub fn pack(e: Expr) -> E { Box::new(e) }
 pub fn unpack(e: &E) -> Expr { *(e.clone()) }
+
+
+// Expr + Expr = Expr
+impl Add for Expr {
+	type Output = Expr;
+	fn add(self, other: Expr) -> Expr {
+		Add(pack(self), pack(other))
+	}
+}
+
+// f64 + Expr = Expr
+impl Add<Expr> for f64 {
+	type Output = Expr;
+	fn add(self, other: Expr) -> Expr {
+		Add(pack(con(self)), pack(other))
+	}
+}
+
+// Expr + f64 = Expr
+impl Add<f64> for Expr {
+	type Output = Expr;
+	fn add(self, other: f64) -> Expr {
+		Add(pack(con(other)), pack(self))
+	}
+} 
+
+// Expr - Expr = Expr
+impl Sub for Expr {
+	type Output = Expr;
+	fn sub(self, other: Expr) -> Expr {
+		Sub(pack(self), pack(other))
+	}
+}
+
+// f64 - Expr = Expr
+impl Sub<Expr> for f64 {
+	type Output = Expr;
+	fn sub(self, other: Expr) -> Expr {
+		Sub(pack(con(self)), pack(other))
+	}
+}
+
+// Expr - f64 = Expr
+impl Sub<f64> for Expr {
+	type Output = Expr;
+	fn sub(self, other: f64) -> Expr {
+		Sub(pack(con(other)), pack(self))
+	}
+}
+
+// Expr * Expr = Expr
+impl Mul for Expr {
+	type Output = Expr;
+	fn mul(self, other: Expr) -> Expr {
+		Mul(pack(self), pack(other))
+	}
+}
+
+// f64 * Expr = Expr
+impl Mul<Expr> for f64 {
+	type Output = Expr;
+	fn mul(self, other: Expr) -> Expr {
+		Mul(pack(con(self)), pack(other))
+	}
+}
+
+// Expr * f64 = Expr
+impl Mul<f64> for Expr {
+	type Output = Expr;
+	fn mul(self, other: f64) -> Expr {
+		Mul(pack(con(other)), pack(self))
+	}
+}
+
+// Expr / Expr = Expr
+impl Div for Expr {
+	type Output = Expr;
+	fn div(self, other: Expr) -> Expr {
+		Div(pack(self), pack(other))
+	}
+}
+
+// f64 / Expr = Expr
+impl Div<Expr> for f64 {
+	type Output = Expr;
+	fn div(self, other: Expr) -> Expr {
+		Div(pack(con(self)), pack(other))
+	}
+}
+
+// Expr / f64 = Expr
+impl Div<f64> for Expr {
+	type Output = Expr;
+	fn div(self, other: f64) -> Expr {
+		Div(pack(self), pack(con(other)))
+	}
+}
+
+// -Expr = Expr
+impl Neg for Expr {
+	type Output = Expr;
+	fn neg(self) -> Expr {
+		Mul(pack(con(-1.0)), pack(self))
+	}
+}
 
 pub fn nan()        -> Expr { NaN }
 pub fn con(v: f64)  -> Expr { Const(v) }
 pub fn var(c: char) -> Expr { Var(c) }
 pub fn neg(e: Expr) -> Expr { mul(con(-1.0), e) }
-pub fn varf(v: f64, c: char) -> Expr { mul(con(v), var(c)) }
+pub fn varf(v: f64, c: char) -> Expr { mul(con(v),  var(c)) }
 pub fn add(l: Expr, r: Expr) -> Expr { Add(pack(l), pack(r)) }
 pub fn sub(l: Expr, r: Expr) -> Expr { Sub(pack(l), pack(r)) }
 pub fn mul(l: Expr, r: Expr) -> Expr { Mul(pack(l), pack(r)) }
@@ -135,6 +238,54 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
             }
         },
 
+        Mul(ref l, ref r) => {
+            let left = evaluate(unpack(l), sym, value);
+            let right = evaluate(unpack(r), sym, value);
+
+            match (left, right) {
+                (Const(lv), Const(rv)) => Const(lv * rv),
+                (Const(lv), Var(c)) => {
+                    if c == sym {
+                        Const(lv * value)
+                    } else {
+                        Mul(pack(Const(lv)), pack(Var(c)))
+                    }
+                }
+                (Var(c), Const(rv)) => {
+                    if c == sym {
+                        Const(rv * value)
+                    } else {
+                        Mul(pack(Const(rv)), pack(Var(c)))
+                    }
+                }
+                (a,b) => Mul(pack(a), pack(b)),
+            }
+        },
+
+        Div(ref l, ref r) => {
+            let left = evaluate(unpack(l), sym, value);
+            let right = evaluate(unpack(r), sym, value);
+
+            match (left, right) {
+                (Const(lv), Const(rv)) => Const(lv / rv),
+                (Const(lv), Var(c)) => {
+                    if c == sym {
+                        Const(lv / value)
+                    } else {
+                        Div(pack(Const(lv)), pack(Var(c)))
+                    }
+                }
+                (Var(c), Const(rv)) => {
+                    if c == sym {
+                        Const(rv / value)
+                    } else {
+                        Div(pack(Const(rv)), pack(Var(c)))
+                    }
+                }
+                (a,b) => Div(pack(a), pack(b)),
+            }
+        },
+
         Sin(ref v) => {
             let inner = evaluate(unpack(v), sym, value);
 
@@ -183,13 +334,24 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
             }
         }
 
+		Pow(ref l, ref r) => {
+			let left = evaluate(unpack(l), sym, value);
+			let right = evaluate(unpack(r), sym, value);		
 
+			match (left, right) {
+				(Const(x), Const(y)) => Const(x.powf(y)),
+				(a,b) => Pow(pack(a), pack(b)),
+			}
+		}
 
+		//Exp(ref v) => {
+		//},
+
+		//Ln(ref v) => {
+		//},
 
         _ => NaN,
-
     }
-
 }
 
 
