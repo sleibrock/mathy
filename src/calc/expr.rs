@@ -189,6 +189,15 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
         NaN => NaN,
         Const(v) => Const(v),
         Var(x) => if x == sym { Const(value) } else { Var(x) },
+		
+		Neg(ref v) => {
+			let inner = evaluate(unpack(v), sym, value);
+
+			match inner {
+				Const(x) => Const(-x),
+				a => Neg(pack(a)),
+			}
+		},
 
         Add(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, value);
@@ -340,17 +349,55 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
 
 			match (left, right) {
 				(Const(x), Const(y)) => Const(x.powf(y)),
+				(Var(c), Const(y)) => {
+					if c == sym {
+						Const(value.powf(y))
+					} else {
+						Pow(pack(var(c)), pack(con(y)))
+					}
+				},
+				(Const(x), Var(c)) => {
+					if c == sym {
+						Const(x.powf(value))
+					} else {
+						Pow(pack(con(x)), pack(var(c)))
+					}
+				},
 				(a,b) => Pow(pack(a), pack(b)),
 			}
 		}
 
-		//Exp(ref v) => {
-		//},
+		Exp(ref v) => {
+			let inner = evaluate(unpack(v), sym, value);
 
-		//Ln(ref v) => {
-		//},
+			match inner {
+				Const(x) => Const(x.exp()),
+				Var(c) => {
+					if c == sym {
+						Const(value.exp())
+					} else {
+						Exp(pack(var(c)))
+					}
+				},
+				a => Exp(pack(a))
+			}
+		},
 
-        _ => NaN,
+		Ln(ref v) => {
+			let inner = evaluate(unpack(v), sym, value);
+
+			match inner {
+				Const(x) => Const(x.ln()),
+				Var(c) => {
+					if sym == c {
+						Const(value.ln())
+					} else {
+						Ln(pack(var(c)))
+					} 
+				},
+				a => Ln(pack(a)),
+			}
+		},
     }
 }
 
