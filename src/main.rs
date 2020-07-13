@@ -1,4 +1,4 @@
-use mathy::calc::expr::*;
+use mathy::calc::prelude::*;
 
 fn main() {
     let myexp = (var('x') * con(3.0)) / con(2.0); 
