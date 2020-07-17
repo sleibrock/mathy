@@ -50,6 +50,35 @@ impl Expr {
             _ => false,
         }
     }
+
+    pub  fn to_string(&self) -> String {
+        match self {
+            NaN      => String::from("NaN"),
+            Const(c) => String::from(format!("{}", c)),
+            Var(s)   => String::from(format!("{}", s)),
+            Neg(ref i) => String::from(format!("-({})",   i.to_string())),
+            Ln(ref i)  => String::from(format!("ln({})",  i.to_string())),
+            Exp(ref i) => String::from(format!("e^({})",  i.to_string())),
+            Sin(ref i) => String::from(format!("sin({})", i.to_string())),
+            Cos(ref i) => String::from(format!("sin({})", i.to_string())),
+            Tan(ref i) => String::from(format!("sin({})", i.to_string())),
+            Add(ref l, ref r) => {
+                String::from(format!("({}) + ({})", l.to_string(), r.to_string()))
+            },
+            Sub(ref l, ref r) => {
+                String::from(format!("({}) - ({})", l.to_string(), r.to_string()))
+            },
+            Mul(ref l, ref r) => {
+                String::from(format!("({}) * ({})", l.to_string(), r.to_string()))
+            },
+            Div(ref l, ref r) => {
+                String::from(format!("({}) / ({})", l.to_string(), r.to_string()))
+            },
+            Pow(ref l, ref r) => {
+                String::from(format!("({})^({})", l.to_string(), r.to_string()))
+            },
+        }
+    }
 }
 
 // Boxing tools to size out recursive structures
