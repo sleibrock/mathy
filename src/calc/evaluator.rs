@@ -27,19 +27,19 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
                 (Const(lv), Const(rv)) => Const(lv + rv),
                 (Const(lv), Var(c)) => {
                     if c == sym {
-                        Const(lv + value)
+                        con(lv + value)
                     } else {
-                        Add(pack(Const(lv)), pack(Var(c)))
+                        add(con(lv), var(c))
                     }
                 }
                 (Var(c), Const(rv)) => {
                     if c == sym {
-                        Const(rv + value)
+                        con(rv + value)
                     } else {
-                        Add(pack(Const(rv)), pack(Var(c)))
+                        add(Const(rv), var(c))
                     }
                 }
-                (a,b) => Add(pack(a), pack(b)),
+                (a,b) => add(a, b),
             }
         },
 
@@ -51,19 +51,19 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
                 (Const(lv), Const(rv)) => Const(lv - rv),
                 (Const(lv), Var(c)) => {
                     if c == sym {
-                        Const(lv - value)
+                        con(lv - value)
                     } else {
-                        Sub(pack(Const(lv)), pack(Var(c)))
+                        sub(con(lv), var(c))
                     }
                 }
                 (Var(c), Const(rv)) => {
                     if c == sym {
-                        Const(rv - value)
+                        con(rv - value)
                     } else {
-                        Sub(pack(Const(rv)), pack(Var(c)))
+                        sub(con(rv), var(c))
                     }
                 }
-                (a,b) => Sub(pack(a), pack(b)),
+                (a,b) => sub(a, b),
             }
         },
 
@@ -75,19 +75,19 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
                 (Const(lv), Const(rv)) => Const(lv * rv),
                 (Const(lv), Var(c)) => {
                     if c == sym {
-                        Const(lv * value)
+                        con(lv * value)
                     } else {
-                        Mul(pack(Const(lv)), pack(Var(c)))
+                        mul(con(lv), var(c))
                     }
                 }
                 (Var(c), Const(rv)) => {
                     if c == sym {
-                        Const(rv * value)
+                        con(rv * value)
                     } else {
-                        Mul(pack(Const(rv)), pack(Var(c)))
+                        mul(con(rv), var(c))
                     }
                 }
-                (a,b) => Mul(pack(a), pack(b)),
+                (a,b) => mul(a, b),
             }
         },
 

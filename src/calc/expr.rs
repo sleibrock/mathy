@@ -33,6 +33,29 @@ impl Expr {
         }
     }
 
+    pub fn is_const(&self) -> bool {
+        match self {
+            Const(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_var(&self) -> bool {
+        match self {
+            Var(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_op(&self) -> bool {
+        match self {
+            NaN => false,
+            Const(_) => false,
+            Var(_) => false,
+            _ => true,
+        }
+    }
+
     pub fn has_var(&self, s: char) -> bool {
         match self {
             Var(x)     => { s == *x },
@@ -78,6 +101,10 @@ impl Expr {
                 String::from(format!("({})^({})", l.to_string(), r.to_string()))
             },
         }
+    }
+
+    pub fn pack(&self) -> E {
+        Box::new(self.clone())
     }
 }
 
@@ -191,6 +218,7 @@ impl Neg for Expr {
 }
 
 pub fn nan()        -> Expr { NaN }
+pub fn zero()       -> Expr { Const(0.0) }
 pub fn con(v: f64)  -> Expr { Const(v) }
 pub fn var(c: char) -> Expr { Var(c) }
 pub fn neg(e: Expr) -> Expr { mul(con(-1.0), e) }
