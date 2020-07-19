@@ -80,7 +80,26 @@ pub fn simplify(e: Expr) -> Expr {
                 },
                 (a, b) => mul(simplify(a), simplify(b)),
             }
-        }
+        }, // end multiplication logic
+
+        Div(ref l, ref r) => {
+            let left = unpack(l);
+            let right = unpack(r);
+
+            match (left, right) {
+                (numerator, Const(x)) => {
+                    if x == 1.0 {
+                        simplify(numerator)   
+                    } else if x == 0.0 {
+                        NaN
+                    } else {
+                        div(simplify(numerator), con(x))
+                    }
+                }
+
+                (a, b) => div(simplify(a), simplify(b)),
+            }
+        }, // end division logic
 
         _ => e,
     }
