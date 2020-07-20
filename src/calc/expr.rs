@@ -222,7 +222,7 @@ pub fn zero()       -> Expr { Const(0.0) }
 pub fn con(v: f64)  -> Expr { Const(v) }
 pub fn var(c: char) -> Expr { Var(c) }
 pub fn neg(e: Expr) -> Expr { mul(con(-1.0), e) }
-pub fn varf(v: f64, c: char) -> Expr { mul(con(v),  var(c)) }
+pub fn varf(c: char, v: f64) -> Expr { mul(con(v),  var(c)) }
 pub fn add(l: Expr, r: Expr) -> Expr { Add(pack(l), pack(r)) }
 pub fn sub(l: Expr, r: Expr) -> Expr { Sub(pack(l), pack(r)) }
 pub fn mul(l: Expr, r: Expr) -> Expr { Mul(pack(l), pack(r)) }

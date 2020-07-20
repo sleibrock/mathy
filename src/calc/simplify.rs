@@ -75,7 +75,18 @@ pub fn simplify(e: Expr) -> Expr {
                     } else if x == -1.0 {
                         neg(simplify(b))
                     } else {
-                        mul(con(x), b)
+                        mul(con(x), simplify(b))
+                    }
+                },
+                (a, Const(y)) => {
+                    if y == 0.0 {
+                        zero()
+                    } else if y == 1.0 {
+                        simplify(a)
+                    } else if y == -1.0 {
+                        neg(simplify(a))
+                    } else {
+                       mul(con(y), simplify(a)) 
                     }
                 },
                 (a, b) => mul(simplify(a), simplify(b)),
@@ -95,7 +106,7 @@ pub fn simplify(e: Expr) -> Expr {
                     } else {
                         div(simplify(numerator), con(x))
                     }
-                }
+                },
 
                 (a, b) => div(simplify(a), simplify(b)),
             }
