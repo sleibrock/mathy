@@ -2,13 +2,16 @@
 
 use std::ops::{Add,Sub,Mul,Div,Neg};
 
+use crate::number::number::*;
+use crate::number::number::Number::*;
+
 pub type E = Box<Expr>;
 
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
     NaN,
-    Const(f64),
+    Const(Number),
     Var(char),
     Neg(E),
     Add(E, E),
@@ -26,13 +29,6 @@ pub enum Expr {
 use self::Expr::*;
 
 impl Expr {
-    pub fn is_zero(&self) -> bool {
-        match self {
-            Const(f) => *f == 0.0,
-            _ => false,
-        }
-    }
-
     pub fn is_const(&self) -> bool {
         match self {
             Const(_) => true,
@@ -74,10 +70,34 @@ impl Expr {
         }
     }
 
-    pub  fn to_string(&self) -> String {
+    /// Use this to substitute any variable with another
+    pub fn substitute(&self, sym1: char, sym2: char) -> Expr {
+        match self {
+            Var(x) => {
+                if *x == sym1 {
+                    Var(sym2)
+                } else {
+                    Var(*x)
+                }
+            },
+            Neg(ref i) => neg(i.substitute(sym1, sym2)),
+            Exp(ref i) => exp(i.substitute(sym1, sym2)),
+            Sin(ref i) => sin(i.substitute(sym1, sym2)),
+            Cos(ref i) => cos(i.substitute(sym1, sym2)),
+            Tan(ref i) => tan(i.substitute(sym1, sym2)),
+            Add(ref l, ref r) => add(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
+            Sub(ref l, ref r) => sub(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
+            Mul(ref l, ref r) => mul(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
+            Div(ref l, ref r) => div(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
+            Pow(ref l, ref r) => pow(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
+            e => e.clone(),
+        }
+    }
+
+    pub fn to_string(&self) -> String {
         match self {
             NaN      => String::from("NaN"),
-            Const(c) => String::from(format!("{}", c)),
+            Const(c) => String::from(format!("{}", c.to_string())),
             Var(s)   => String::from(format!("{}", s)),
             Neg(ref i) => String::from(format!("-({})",   i.to_string())),
             Ln(ref i)  => String::from(format!("ln({})",  i.to_string())),
@@ -218,10 +238,11 @@ impl Neg for Expr {
 }
 
 pub fn nan()        -> Expr { NaN }
-pub fn zero()       -> Expr { Const(0.0) }
-pub fn con(v: f64)  -> Expr { Const(v) }
+pub fn zero()       -> Expr { Const(real(0.0)) }
+pub fn con(v: f64)  -> Expr { Const(real(v)) }
 pub fn var(c: char) -> Expr { Var(c) }
 pub fn neg(e: Expr) -> Expr { mul(con(-1.0), e) }
+pub fn exp(e: Expr) -> Expr { Exp(pack(e)) }
 pub fn varf(c: char, v: f64) -> Expr { mul(con(v),  var(c)) }
 pub fn add(l: Expr, r: Expr) -> Expr { Add(pack(l), pack(r)) }
 pub fn sub(l: Expr, r: Expr) -> Expr { Sub(pack(l), pack(r)) }
@@ -237,7 +258,15 @@ pub fn cos(e: Expr)    -> Expr { Cos(pack(e)) }
 pub fn tan(e: Expr)    -> Expr { Tan(pack(e)) }
 pub fn ln(e: Expr)     -> Expr { Ln(pack(e)) }
 pub fn log(base: f64, e: Expr) -> Expr {
-    Div(pack(ln(e)), pack(ln(Const(base))))
+    div(ln(e), ln(con(base)))
+}
+
+pub fn base2(e: Expr) -> Expr {
+    div(ln(e), ln(con(2.0)))
+}
+
+pub fn base10(e: Expr) -> Expr {
+    div(ln(e), ln(con(10.0)))
 }
 
 // unit tests and other such things

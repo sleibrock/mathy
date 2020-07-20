@@ -2,39 +2,48 @@
 
 use crate::calc::expr::*;
 use crate::calc::expr::Expr::*;
+use crate::number::number::*;
+use crate::number::number::Number::*;
 
 // execute a one-var evaluation on an expression tree
-pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
+pub fn evaluate(e: Expr, sym: char, v: f64) -> Expr {
+    let value = real(v);
     match e {
         NaN => NaN,
-        Const(v) => Const(v),
-        Var(x) => if x == sym { Const(value) } else { Var(x) },
+        Const(c) => Const(c),
+        Var(x) => {
+            if x == sym {
+                con(v)
+            } else {
+                Var(x)
+            }
+        },
 		
-		Neg(ref v) => {
-			let inner = evaluate(unpack(v), sym, value);
+		Neg(ref i) => {
+			let inner = evaluate(unpack(i), sym, v);
 
 			match inner {
 				Const(x) => Const(-x),
-				a => Neg(pack(a)),
+				a => neg(a),
 			}
 		},
 
         Add(ref l, ref r) => {
-            let left = evaluate(unpack(l), sym, value);
-            let right = evaluate(unpack(r), sym, value);
+            let left = evaluate(unpack(l), sym, v);
+            let right = evaluate(unpack(r), sym, v);
 
             match (left, right) {
                 (Const(lv), Const(rv)) => Const(lv + rv),
                 (Const(lv), Var(c)) => {
                     if c == sym {
-                        con(lv + value)
+                        Const(lv + value)
                     } else {
-                        add(con(lv), var(c))
+                        add(Const(lv), var(c))
                     }
                 }
                 (Var(c), Const(rv)) => {
                     if c == sym {
-                        con(rv + value)
+                        Const(rv + value)
                     } else {
                         add(Const(rv), var(c))
                     }
@@ -44,23 +53,23 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
         },
 
         Sub(ref l, ref r) => {
-            let left = evaluate(unpack(l), sym, value);
-            let right = evaluate(unpack(r), sym, value);
+            let left = evaluate(unpack(l), sym, v);
+            let right = evaluate(unpack(r), sym, v);
 
             match (left, right) {
                 (Const(lv), Const(rv)) => Const(lv - rv),
                 (Const(lv), Var(c)) => {
                     if c == sym {
-                        con(lv - value)
+                        Const(lv - value)
                     } else {
-                        sub(con(lv), var(c))
+                        sub(Const(lv), var(c))
                     }
                 }
                 (Var(c), Const(rv)) => {
                     if c == sym {
-                        con(rv - value)
+                        Const(rv - value)
                     } else {
-                        sub(con(rv), var(c))
+                        sub(Const(rv), var(c))
                     }
                 }
                 (a,b) => sub(a, b),
@@ -68,23 +77,23 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
         },
 
         Mul(ref l, ref r) => {
-            let left = evaluate(unpack(l), sym, value);
-            let right = evaluate(unpack(r), sym, value);
+            let left = evaluate(unpack(l), sym, v);
+            let right = evaluate(unpack(r), sym, v);
 
             match (left, right) {
                 (Const(lv), Const(rv)) => Const(lv * rv),
                 (Const(lv), Var(c)) => {
                     if c == sym {
-                        con(lv * value)
+                        Const(lv * value)
                     } else {
-                        mul(con(lv), var(c))
+                        mul(Const(lv), var(c))
                     }
                 }
                 (Var(c), Const(rv)) => {
                     if c == sym {
-                        con(rv * value)
+                        Const(rv * value)
                     } else {
-                        mul(con(rv), var(c))
+                        mul(Const(rv), var(c))
                     }
                 }
                 (a,b) => mul(a, b),
@@ -92,8 +101,8 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
         },
 
         Div(ref l, ref r) => {
-            let left = evaluate(unpack(l), sym, value);
-            let right = evaluate(unpack(r), sym, value);
+            let left = evaluate(unpack(l), sym, v);
+            let right = evaluate(unpack(r), sym, v);
 
             match (left, right) {
                 (Const(lv), Const(rv)) => Const(lv / rv),
@@ -111,12 +120,12 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
                         Div(pack(Const(rv)), pack(Var(c)))
                     }
                 }
-                (a,b) => Div(pack(a), pack(b)),
+                (a,b) => div(a, b),
             }
         },
 
-        Sin(ref v) => {
-            let inner = evaluate(unpack(v), sym, value);
+        Sin(ref i) => {
+            let inner = evaluate(unpack(i), sym, v);
 
             match inner {
                 Const(x) => Const(x.sin()),
@@ -131,8 +140,8 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
             }
         }
 
-        Cos(ref v) => {
-            let inner = evaluate(unpack(v), sym, value);
+        Cos(ref i) => {
+            let inner = evaluate(unpack(i), sym, v);
 
             match inner {
                 Const(x) => Const(x.cos()),
@@ -147,8 +156,8 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
             }
         }
 
-        Tan(ref v) => {
-            let inner = evaluate(unpack(v), sym, value);
+        Tan(ref i) => {
+            let inner = evaluate(unpack(i), sym, v);
 
             match inner {
                 Const(x) => Const(x.tan()),
@@ -156,7 +165,7 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
                     if c == sym {
                         Const(value.tan())
                     } else {
-                        Tan(pack(var(c)))
+                        tan(var(c))
                     }
                 },
                 a => Tan(pack(a)),
@@ -164,31 +173,31 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
         }
 
 		Pow(ref l, ref r) => {
-			let left = evaluate(unpack(l), sym, value);
-			let right = evaluate(unpack(r), sym, value);		
+			let left = evaluate(unpack(l), sym, v);
+			let right = evaluate(unpack(r), sym, v);		
 
 			match (left, right) {
-				(Const(x), Const(y)) => Const(x.powf(y)),
+				(Const(x), Const(y)) => Const(x.pow(y)),
 				(Var(c), Const(y)) => {
 					if c == sym {
-						Const(value.powf(y))
+						Const(value.pow(y))
 					} else {
-						Pow(pack(var(c)), pack(con(y)))
+						pow(var(c), Const(y))
 					}
 				},
 				(Const(x), Var(c)) => {
 					if c == sym {
-						Const(x.powf(value))
+						Const(x.pow(value))
 					} else {
-						Pow(pack(con(x)), pack(var(c)))
+						pow(Const(x), var(c))
 					}
 				},
 				(a,b) => Pow(pack(a), pack(b)),
 			}
 		}
 
-		Exp(ref v) => {
-			let inner = evaluate(unpack(v), sym, value);
+		Exp(ref i) => {
+			let inner = evaluate(unpack(i), sym, v);
 
 			match inner {
 				Const(x) => Const(x.exp()),
@@ -196,15 +205,15 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
 					if c == sym {
 						Const(value.exp())
 					} else {
-						Exp(pack(var(c)))
+						exp(var(c))
 					}
 				},
-				a => Exp(pack(a))
+				a => exp(a)
 			}
 		},
 
-		Ln(ref v) => {
-			let inner = evaluate(unpack(v), sym, value);
+		Ln(ref i) => {
+			let inner = evaluate(unpack(i), sym, v);
 
 			match inner {
 				Const(x) => Const(x.ln()),
@@ -212,10 +221,10 @@ pub fn evaluate(e: Expr, sym: char, value: f64) -> Expr {
 					if sym == c {
 						Const(value.ln())
 					} else {
-						Ln(pack(var(c)))
+						ln(var(c))
 					} 
 				},
-				a => Ln(pack(a)),
+				a => ln(a),
 			}
 		},
     }

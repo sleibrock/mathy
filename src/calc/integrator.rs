@@ -7,7 +7,7 @@ use crate::calc::expr::Expr::*;
 pub fn integrate(e: Expr, sym: char) -> Expr {
     match e {
         NaN => NaN,
-        Const(c) => add(varf(sym, c), var('C')),
+        Const(c) => add(mul(Const(c), Var(sym)), var('C')),
         _ => NaN,
     }
 }

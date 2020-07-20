@@ -16,17 +16,17 @@ pub fn simplify(e: Expr) -> Expr {
             match (left, right) {
                 (Const(l), Const(r)) => Const(l + r),
                 (Const(x), b) => {
-                    if x == 0.0 {
+                    if x.is_zero() {
                         simplify(b)
                     } else {
-                        add(con(x), simplify(b))
+                        add(Const(x), simplify(b))
                     }
                 },
                 (a, Const(x)) => {
-                    if x == 0.0 {
+                    if x.is_zero() {
                         simplify(a)
                     } else {
-                        add(con(x), simplify(a))
+                        add(Const(x), simplify(a))
                     }
                 },
                 (a, b)  => add( simplify(a), simplify(b)),
@@ -38,19 +38,19 @@ pub fn simplify(e: Expr) -> Expr {
             let right = unpack(r);
 
             match (left, right) {
-                (Const(a), Const(b)) => con(a - b),
+                (Const(a), Const(b)) => Const(a - b),
                 (Const(x), b) => {
-                    if x == 0.0 {
+                    if x.is_zero() {
                         neg(simplify(b))
                     } else {
-                        sub(con(x), simplify(b))
+                        sub(Const(x), simplify(b))
                     }
                 },
                 (a, Const(x)) => {
-                    if x == 0.0 {
+                    if x.is_zero() {
                         simplify(a)
                     } else {
-                        sub(simplify(a), con(x))
+                        sub(simplify(a), Const(x))
                     }
                 },
                 (a, Neg(i)) => {
@@ -66,27 +66,27 @@ pub fn simplify(e: Expr) -> Expr {
             let right = unpack(r);
 
             match (left, right) {
-                (Const(x), Const(y)) => con(x * y),
+                (Const(x), Const(y)) => Const(x * y),
                 (Const(x), b) => {
-                    if x == 0.0 {
+                    if x.is_zero() {
                         zero()
-                    } else if x == 1.0 {
+                    } else if x.real_eq(1.0) {
                         simplify(b)
-                    } else if x == -1.0 {
+                    } else if x.real_eq(-1.0) {
                         neg(simplify(b))
                     } else {
-                        mul(con(x), simplify(b))
+                        mul(Const(x), simplify(b))
                     }
                 },
                 (a, Const(y)) => {
-                    if y == 0.0 {
+                    if y.is_zero() {
                         zero()
-                    } else if y == 1.0 {
+                    } else if y.real_eq(1.0) {
                         simplify(a)
-                    } else if y == -1.0 {
+                    } else if y.real_eq(-1.0) {
                         neg(simplify(a))
                     } else {
-                       mul(con(y), simplify(a)) 
+                       mul(Const(y), simplify(a)) 
                     }
                 },
                 (a, b) => mul(simplify(a), simplify(b)),
@@ -99,12 +99,12 @@ pub fn simplify(e: Expr) -> Expr {
 
             match (left, right) {
                 (numerator, Const(x)) => {
-                    if x == 1.0 {
+                    if x.real_eq(1.0) {
                         simplify(numerator)   
-                    } else if x == 0.0 {
+                    } else if x.real_eq(0.0) {
                         NaN
                     } else {
-                        div(simplify(numerator), con(x))
+                        div(simplify(numerator), Const(x))
                     }
                 },
 
