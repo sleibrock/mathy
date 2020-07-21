@@ -76,13 +76,6 @@ impl Number {
         }
     }
 
-    pub fn tan(&self) -> Number {
-        match self {
-            Real(x) => Real(x.tan()),
-            _ => Real(0.0),
-        }
-    }
-
     pub fn ln(&self) -> Number {
         match self {
             Real(x) => Real(x.ln()),

@@ -2,6 +2,8 @@
 
 use crate::calc::expr::*;
 use crate::calc::expr::Expr::*;
+//use crate::number::number::*;
+//use crate::number::number::Number::*;
 
 
 pub fn simplify(e: Expr) -> Expr {
@@ -120,8 +122,8 @@ pub fn simplify(e: Expr) -> Expr {
 mod test {
     use super::*;
 
-    const ZERO : Expr = Const(0.0);
-    const ONE : Expr = Const(1.0);
+    const ZERO : Expr = Const(Real(0.0));
+    const ONE : Expr = Const(Real(1.0));
 
     #[test]
     fn test_add_simplify() {
@@ -137,6 +139,9 @@ mod test {
         ];
 
         for (l, r) in tests.iter().zip(answers.iter()) {
+            println!("Left: {:?}", l);
+            println!("Right: {:?}", r);
+            println!("Simplified left: {:?}", simplify(l.clone()));
             assert_eq!(simplify(l.clone()), r.clone());
         }
     }

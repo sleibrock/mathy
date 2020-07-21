@@ -3,7 +3,7 @@
 use crate::calc::expr::*;
 use crate::calc::expr::Expr::*;
 use crate::number::number::*;
-use crate::number::number::Number::*;
+//use crate::number::number::Number::*;
 
 // execute a one-var evaluation on an expression tree
 pub fn evaluate(e: Expr, sym: char, v: f64) -> Expr {
@@ -156,22 +156,6 @@ pub fn evaluate(e: Expr, sym: char, v: f64) -> Expr {
             }
         }
 
-        Tan(ref i) => {
-            let inner = evaluate(unpack(i), sym, v);
-
-            match inner {
-                Const(x) => Const(x.tan()),
-                Var(c) => {
-                    if c == sym {
-                        Const(value.tan())
-                    } else {
-                        tan(var(c))
-                    }
-                },
-                a => Tan(pack(a)),
-            }
-        }
-
 		Pow(ref l, ref r) => {
 			let left = evaluate(unpack(l), sym, v);
 			let right = evaluate(unpack(r), sym, v);		
@@ -238,7 +222,7 @@ mod test {
     fn evaluate_test() {
         let expr = add(con(3.0), var('x'));
         let value = evaluate(expr, 'x', 7.0);
-        assert_eq!(Const(10.0), value);
+        assert_eq!(con(10.0), value);
     }
 }
 // end evaluator.rs

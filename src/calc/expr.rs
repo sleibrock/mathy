@@ -3,7 +3,7 @@
 use std::ops::{Add,Sub,Mul,Div,Neg};
 
 use crate::number::number::*;
-use crate::number::number::Number::*;
+//use crate::number::number::Number::*;
 
 pub type E = Box<Expr>;
 
@@ -21,7 +21,6 @@ pub enum Expr {
     Pow(E, E),
     Sin(E),
     Cos(E),
-    Tan(E),
     Ln(E),
     Exp(E),
 }
@@ -60,7 +59,6 @@ impl Expr {
             Ln(ref e)  => { e.has_var(s) },
             Sin(ref e) => { e.has_var(s) },
             Cos(ref e) => { e.has_var(s) },
-            Tan(ref e) => { e.has_var(s) },
             Add(ref l, ref r) => { l.has_var(s) || r.has_var(s) },
             Sub(ref l, ref r) => { l.has_var(s) || r.has_var(s) },
             Mul(ref l, ref r) => { l.has_var(s) || r.has_var(s) },
@@ -84,7 +82,6 @@ impl Expr {
             Exp(ref i) => exp(i.substitute(sym1, sym2)),
             Sin(ref i) => sin(i.substitute(sym1, sym2)),
             Cos(ref i) => cos(i.substitute(sym1, sym2)),
-            Tan(ref i) => tan(i.substitute(sym1, sym2)),
             Add(ref l, ref r) => add(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
             Sub(ref l, ref r) => sub(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
             Mul(ref l, ref r) => mul(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
@@ -103,8 +100,7 @@ impl Expr {
             Ln(ref i)  => String::from(format!("ln({})",  i.to_string())),
             Exp(ref i) => String::from(format!("e^({})",  i.to_string())),
             Sin(ref i) => String::from(format!("sin({})", i.to_string())),
-            Cos(ref i) => String::from(format!("sin({})", i.to_string())),
-            Tan(ref i) => String::from(format!("sin({})", i.to_string())),
+            Cos(ref i) => String::from(format!("cos({})", i.to_string())),
             Add(ref l, ref r) => {
                 String::from(format!("({}) + ({})", l.to_string(), r.to_string()))
             },
@@ -255,7 +251,10 @@ pub fn square(e: Expr) -> Expr { powf(e, 2.0) }
 pub fn cube(e: Expr)   -> Expr { powf(e, 3.0) }
 pub fn sin(e: Expr)    -> Expr { Sin(pack(e)) }
 pub fn cos(e: Expr)    -> Expr { Cos(pack(e)) }
-pub fn tan(e: Expr)    -> Expr { Tan(pack(e)) }
+pub fn tan(e: Expr)    -> Expr {
+    let e2 = e.clone();
+    div(sin(e), cos(e2))
+}
 pub fn ln(e: Expr)     -> Expr { Ln(pack(e)) }
 pub fn log(base: f64, e: Expr) -> Expr {
     div(ln(e), ln(con(base)))
@@ -276,14 +275,20 @@ mod test {
 
     #[test]
     fn has_var_test() {
-        let expr  = varf(3.0, 'x');
-        let expr2 = varf(3.0, 'y');
+        let expr  = varf('x', 3.0);
+        let expr2 = varf('y', 3.0);
         let expr3 = con(3.0);
         assert_eq!(true,  expr.has_var('x')); 
         assert_eq!(false, expr2.has_var('x'));
         assert_eq!(false, expr3.has_var('x'));
     }
 
+    #[test]
+    fn is_equal_test() {
+        let f1 = add(con(2.0), con(2.0));
+        let f2 = add(con(2.0), con(2.0));
+        assert_eq!(f1, f2);
+    }
 }
 
 // end src/calc/expr.rs
