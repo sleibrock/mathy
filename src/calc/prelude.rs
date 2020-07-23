@@ -1,8 +1,8 @@
 // src/calc/prelude.rs
 
-pub use crate::calc::expr::*;
-pub use crate::calc::evaluator::*;
 pub use crate::calc::deriver::*;
-pub use crate::calc::simplify::*;
+pub use crate::calc::integrator::*;
+pub use crate::expr::expr::*;
+pub use crate::expr::simplify::*;
 
 // end prelude

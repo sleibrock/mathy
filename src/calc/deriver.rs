@@ -1,9 +1,7 @@
 // src/calc/deriver.rs
 
-use crate::calc::expr::*;
-use crate::calc::expr::Expr::*;
-//use crate::number::number::*;
-//use crate::number::number::Number::*;
+use crate::expr::expr::*;
+use crate::expr::expr::Expr::*;
 
 /// Execute a one-variable differentiaton.
 /// Hold other variables constant at zero.

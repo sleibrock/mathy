@@ -1,7 +1,7 @@
 // src/calc/simplify.rs
 
-use crate::calc::expr::*;
-use crate::calc::expr::Expr::*;
+use crate::expr::expr::*;
+use crate::expr::expr::Expr::*;
 //use crate::number::number::*;
 //use crate::number::number::Number::*;
 
