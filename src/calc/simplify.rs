@@ -12,8 +12,8 @@ pub fn simplify(e: Expr) -> Expr {
             neg(simplify(unpack(i)))
         },
         Add(ref l, ref r) => {
-            let left = unpack(l);
-            let right = unpack(r);
+            let left = simplify(unpack(l));
+            let right = simplify(unpack(r));
 
             match (left, right) {
                 (Const(l), Const(r)) => Const(l + r),
@@ -31,14 +31,47 @@ pub fn simplify(e: Expr) -> Expr {
                         add(Const(x), simplify(a))
                     }
                 },
-                (a, b)  => add( simplify(a), simplify(b)),
+
+		// now we look for Euler's trig identity
+		(Pow(ref l, ref p1), Pow(ref r, ref p2)) => {
+		    let left = unpack(l);
+		    let right = unpack(r);
+		    let power1 = unpack(p1);
+		    let power2 = unpack(p2);
+
+		    if power1 == con(2.0) && power2 == con(2.0) {
+			match (left, right) {
+			    (Cos(ref a), Sin(ref b)) => {
+				let a1 = unpack(a);
+				let b1 = unpack(b);
+				if a1 == b1 {
+				    con(1.0)
+				} else {
+				   add(pow(a1, power1), pow(b1, power2)) 
+				}
+			    },
+			    (Sin(ref a), Cos(ref b)) => {
+				let a1 = unpack(a);
+				let b1 = unpack(b);
+				if a1 == b1 {
+				    con(1.0)
+				} else {
+				   add(pow(a1, power1), pow(b1, power2)) 
+				}
+			    }
+			    (a, b) => add(pow(a, power1), pow(b, power2))
+			}
+		    } else {
+			add(pow(left, power1), pow(right, power2))
+		    }
+		},
+                (a, b)  => add(a, b),
             }
         }, // end addition addition logic 
 
         Sub(ref l, ref r) => {
-            let left = unpack(l);
-            let right = unpack(r);
-
+            let left = simplify(unpack(l));
+            let right = simplify(unpack(r));
             match (left, right) {
                 (Const(a), Const(b)) => Const(a - b),
                 (Const(x), b) => {
@@ -57,7 +90,7 @@ pub fn simplify(e: Expr) -> Expr {
                 },
                 (a, Neg(i)) => {
                     let inner = unpack(&i);
-                    add(simplify(a), simplify(inner)) 
+                    simplify(add(simplify(a), simplify(inner))) 
                 },
                 (a, b) => sub(simplify(a), simplify(b)),
             }
@@ -91,7 +124,54 @@ pub fn simplify(e: Expr) -> Expr {
                        mul(Const(y), simplify(a)) 
                     }
                 },
-                (a, b) => mul(simplify(a), simplify(b)),
+		(left, Neg(r)) => {
+		    let right = unpack(&r);
+		    if left == right {
+			neg(powf(left, 2.0))
+		    } else {
+			mul(left, Neg(r))
+		    }
+		},
+		(Neg(l), right) => {
+		    let left = unpack(&l);
+		    if left == right {
+			neg(powf(left, 2.0))
+		    } else {
+			mul(Neg(l), right)
+		    }
+		},
+		(Var(a), Var(b)) => {
+		    if a == b {
+			powf(var(a), 2.0)
+		    } else {
+			mul(var(a), var(b))
+		    }
+		},
+		(left, Pow(b, p)) => {
+		    let right = unpack(&b);
+		    let power = unpack(&p);
+		    if left == right {
+			pow(left, power + 1.0)
+		    } else {
+			mul(left, pow(right, power))
+		    }
+		},
+		(Pow(a, p), right) => {
+		    let left = unpack(&a);
+		    let power = unpack(&p);
+		    if left == right {
+			pow(right, power + 1.0)
+		    } else {
+			mul(right, pow(left, power))
+		    }
+		},
+                (a, b) => {
+		    if a == b {
+			powf(a, 2.0)
+		    } else {
+			mul(simplify(a), simplify(b))
+		    }
+		},
             }
         }, // end multiplication logic
 
@@ -121,6 +201,7 @@ pub fn simplify(e: Expr) -> Expr {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::number::number::Number::*;
 
     const ZERO : Expr = Const(Real(0.0));
     const ONE : Expr = Const(Real(1.0));

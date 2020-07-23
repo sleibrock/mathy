@@ -5,5 +5,6 @@ fn main() {
     println!("f(x) = {}", myexp.to_string());
 
     let deriv = derive(myexp, 'x');
-    println!("f'(x) = {}", deriv.to_string());
+    let finalresult = simplify(deriv);
+    println!("f'(x) = {}", finalresult.to_string());
 }

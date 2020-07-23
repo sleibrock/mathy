@@ -102,19 +102,94 @@ impl Expr {
             Sin(ref i) => String::from(format!("sin({})", i.to_string())),
             Cos(ref i) => String::from(format!("cos({})", i.to_string())),
             Add(ref l, ref r) => {
-                String::from(format!("({}) + ({})", l.to_string(), r.to_string()))
+		let left = unpack(l);
+		let right = unpack(r);
+		match (left, right) {
+		    (Const(a), Const(b)) => {
+			String::from(format!("{} + {}", a.to_string(), b.to_string()))
+		    },
+		    (Const(a), b) => {
+			String::from(format!("{} + ({})", a.to_string(), b.to_string()))
+		    },
+		    (a, Const(b)) => {
+			String::from(format!("({}) + {}", a.to_string(), b.to_string()))
+		    },
+		    (a, b) => {
+			String::from(format!("({}) + ({})", a.to_string(), b.to_string()))
+		    }
+		}
             },
             Sub(ref l, ref r) => {
-                String::from(format!("({}) - ({})", l.to_string(), r.to_string()))
+		let left = unpack(l);
+		let right = unpack(r);
+		match (left, right) {
+		    (Const(a), Const(b)) => {
+			String::from(format!("{} - {}", a.to_string(), b.to_string()))
+		    },
+		    (Const(a), b) => {
+			String::from(format!("{} - ({})", a.to_string(), b.to_string()))
+		    },
+		    (a, Const(b)) => {
+			String::from(format!("({}) - {}", a.to_string(), b.to_string()))
+		    },
+		    (a, b) => {
+			String::from(format!("({}) - ({})", a.to_string(), b.to_string()))
+		    }
+		}
             },
             Mul(ref l, ref r) => {
-                String::from(format!("({}) * ({})", l.to_string(), r.to_string()))
+		let left = unpack(l);
+		let right = unpack(r);
+		match (left, right) {
+		    (Const(a), Const(b)) => {
+			String::from(format!("{} * {}", a.to_string(), b.to_string()))
+		    },
+		    (Const(a), b) => {
+			String::from(format!("{} * ({})", a.to_string(), b.to_string()))
+		    },
+		    (a, Const(b)) => {
+			String::from(format!("({}) * {}", a.to_string(), b.to_string()))
+		    },
+		    (a, b) => {
+			String::from(format!("({}) * ({})", a.to_string(), b.to_string()))
+		    }
+		}
             },
             Div(ref l, ref r) => {
-                String::from(format!("({}) / ({})", l.to_string(), r.to_string()))
+		let left = unpack(l);
+		let right = unpack(r);
+		match (left, right) {
+		    (Const(a), Const(b)) => {
+			String::from(format!("{} / {}", a.to_string(), b.to_string()))
+		    },
+		    (Const(a), b) => {
+			String::from(format!("{} / {}", a.to_string(), b.to_string()))
+		    },
+		    (a, Const(b)) => {
+			String::from(format!("({}) / {}", a.to_string(), b.to_string()))
+		    },
+		    (a, b) => {
+			String::from(format!("({}) / ({})", a.to_string(), b.to_string()))
+		    }
+		}
             },
             Pow(ref l, ref r) => {
-                String::from(format!("({})^({})", l.to_string(), r.to_string()))
+		let left = unpack(l);
+		let right = unpack(r);
+		match (left, right) {
+		    (Const(a), Const(b)) => {
+			String::from(format!("{}^{}", a.to_string(), b.to_string()))
+		    },
+		    (Const(a), b) => {
+			String::from(format!("{}^({})", a.to_string(), b.to_string()))
+		    },
+		    (a, Const(b)) => {
+			String::from(format!("{}^{}", a.to_string(), b.to_string()))
+		    },
+		    (a, b) => {
+			String::from(format!("({}) ^ ({})", a.to_string(), b.to_string()))
+		    }
+		}
             },
         }
     }
@@ -237,7 +312,7 @@ pub fn nan()        -> Expr { NaN }
 pub fn zero()       -> Expr { Const(real(0.0)) }
 pub fn con(v: f64)  -> Expr { Const(real(v)) }
 pub fn var(c: char) -> Expr { Var(c) }
-pub fn neg(e: Expr) -> Expr { mul(con(-1.0), e) }
+pub fn neg(e: Expr) -> Expr { Neg(pack(e)) }
 pub fn exp(e: Expr) -> Expr { Exp(pack(e)) }
 pub fn varf(c: char, v: f64) -> Expr { mul(con(v),  var(c)) }
 pub fn add(l: Expr, r: Expr) -> Expr { Add(pack(l), pack(r)) }
@@ -288,6 +363,10 @@ mod test {
         let f1 = add(con(2.0), con(2.0));
         let f2 = add(con(2.0), con(2.0));
         assert_eq!(f1, f2);
+
+	let s1 = sin(var('x'));
+	let s2 = sin(var('x'));
+	assert_eq!(s1, s2);
     }
 }
 

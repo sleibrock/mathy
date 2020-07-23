@@ -19,14 +19,13 @@ pub fn evaluate(e: Expr, sym: char, v: f64) -> Expr {
             }
         },
 		
-		Neg(ref i) => {
-			let inner = evaluate(unpack(i), sym, v);
-
-			match inner {
-				Const(x) => Const(-x),
-				a => neg(a),
-			}
-		},
+	Neg(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    match inner {
+		Const(x) => Const(-x),
+		a => neg(a),
+	    }
+	},
 
         Add(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, v);
