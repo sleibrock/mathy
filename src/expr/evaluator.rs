@@ -104,19 +104,31 @@ pub fn evaluate(e: Expr, sym: char, v: f64) -> Expr {
             let right = evaluate(unpack(r), sym, v);
 
             match (left, right) {
-                (Const(lv), Const(rv)) => Const(lv / rv),
+                (Const(lv), Const(rv)) => {
+		    if rv == real(0.0) {
+			NaN
+		    } else {
+			Const(lv / rv)
+		    }
+		},
                 (Const(lv), Var(c)) => {
                     if c == sym {
-                        Const(lv / value)
+			if value == real(0.0) {
+			    NaN
+			} else {
+                            Const(lv / value)
+			}
                     } else {
                         Div(pack(Const(lv)), pack(Var(c)))
                     }
-                }
+                },
                 (Var(c), Const(rv)) => {
-                    if c == sym {
-                        Const(rv / value)
+		    if rv == real(0.0) {
+			NaN
+		    } else if c == sym {
+                        Const(value / rv)
                     } else {
-                        Div(pack(Const(rv)), pack(Var(c)))
+                        Div(pack(Var(c)), pack(Const(rv)))
                     }
                 }
                 (a,b) => div(a, b),
