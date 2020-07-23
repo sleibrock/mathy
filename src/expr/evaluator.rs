@@ -167,63 +167,78 @@ pub fn evaluate(e: Expr, sym: char, v: f64) -> Expr {
             }
         }
 
-		Pow(ref l, ref r) => {
-			let left = evaluate(unpack(l), sym, v);
-			let right = evaluate(unpack(r), sym, v);		
+	Pow(ref l, ref r) => {
+	    let left = evaluate(unpack(l), sym, v);
+	    let right = evaluate(unpack(r), sym, v);		
+	    
+	    match (left, right) {
+		(Const(x), Const(y)) => {
+		    let base = x.real();
+		    let power = y.real();
+		    let log_test = power.log2();
 
-			match (left, right) {
-				(Const(x), Const(y)) => Const(x.pow(y)),
-				(Var(c), Const(y)) => {
-					if c == sym {
-						Const(value.pow(y))
-					} else {
-						pow(var(c), Const(y))
-					}
-				},
-				(Const(x), Var(c)) => {
-					if c == sym {
-						Const(x.pow(value))
-					} else {
-						pow(Const(x), var(c))
-					}
-				},
-				(a,b) => Pow(pack(a), pack(b)),
-			}
-		}
-
-		Exp(ref i) => {
-			let inner = evaluate(unpack(i), sym, v);
-
-			match inner {
-				Const(x) => Const(x.exp()),
-				Var(c) => {
-					if c == sym {
-						Const(value.exp())
-					} else {
-						exp(var(c))
-					}
-				},
-				a => exp(a)
-			}
+		    // check to see if we are raising to a negative power,
+		    // which will give us a complex number if the power
+		    // is of base log2, ie 1/2, 1/4, 1/8, 1/16, ... etc
+		    if base < 0.0 && log_test < 0.0 && (log_test - log_test.round()) == 0.0 {
+			let new_base = base.abs();
+			Const(complex(0.0, new_base.powf(power)))
+		    } else {
+			con(base.powf(power))
+		    }
 		},
-
-		Ln(ref i) => {
-			let inner = evaluate(unpack(i), sym, v);
-
-			match inner {
-				Const(x) => Const(x.ln()),
-				Var(c) => {
-					if sym == c {
-						Const(value.ln())
-					} else {
-						ln(var(c))
-					} 
-				},
-				a => ln(a),
-			}
+		(Var(c), Const(y)) => {
+		    if c == sym {
+			evaluate(Pow(pack(Const(value)), pack(Const(y))), sym, v)
+		    } else {
+			pow(var(c), Const(y))
+		    }
 		},
+		(Const(x), Var(c)) => {
+		    if c == sym {
+			evaluate(Pow(pack(Const(x)), pack(Const(value))), sym, v)
+		    } else {
+			pow(Const(x), var(c))
+		    }
+		},
+		(a,b) => Pow(pack(a), pack(b)),
+	    }
+	}
+	
+	Exp(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    
+	    match inner {
+		Const(x) => Const(x.exp()),
+		Var(c) => {
+		    if c == sym {
+			Const(value.exp())
+		    } else {
+			exp(var(c))
+		    }
+		},
+		a => exp(a)
+	    }
+	},
+	
+	Ln(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    
+	    match inner {
+		Const(x) => Const(x.ln()),
+		Var(c) => {
+		    if sym == c {
+			Const(value.ln())
+		    } else {
+			ln(var(c))
+		    } 
+		},
+		a => ln(a),
+	    }
+	},
     }
 }
+
 
 #[cfg(test)]
 mod test {
@@ -235,5 +250,21 @@ mod test {
         let value = evaluate(expr, 'x', 7.0);
         assert_eq!(con(10.0), value);
     }
+
+    #[test]
+    fn test_complex_sqrt() {
+	let expr = sqrt(var('x'));
+	let value = evaluate(expr, 'x', -1.0);
+	assert_eq!(value, Const(complex(0.0, 1.0)));
+
+	let expr2 = sqrt(var('x'));
+	let value2 = evaluate(expr2, 'x', -3.0);
+	assert_eq!(value2, Const(complex(0.0, 1.7320508075688772)));
+
+	let expr3 = sqrt(var('x'));
+	let value3 = evaluate(expr3, 'x', -4.0);
+	assert_eq!(value3, Const(complex(0.0, 2.0)));
+    }
 }
+
 // end evaluator.rs
