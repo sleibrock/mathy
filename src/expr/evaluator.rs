@@ -172,21 +172,7 @@ pub fn evaluate(e: Expr, sym: char, v: f64) -> Expr {
 	    let right = evaluate(unpack(r), sym, v);		
 	    
 	    match (left, right) {
-		(Const(x), Const(y)) => {
-		    let base = x.real();
-		    let power = y.real();
-		    let log_test = power.log2();
-
-		    // check to see if we are raising to a negative power,
-		    // which will give us a complex number if the power
-		    // is of base log2, ie 1/2, 1/4, 1/8, 1/16, ... etc
-		    if base < 0.0 && log_test < 0.0 && (log_test - log_test.round()) == 0.0 {
-			let new_base = base.abs();
-			Const(complex(0.0, new_base.powf(power)))
-		    } else {
-			con(base.powf(power))
-		    }
-		},
+		(Const(x), Const(y)) => Const(x.pow(y)),
 		(Var(c), Const(y)) => {
 		    if c == sym {
 			evaluate(Pow(pack(Const(value)), pack(Const(y))), sym, v)

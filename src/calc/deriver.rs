@@ -116,6 +116,7 @@ pub fn derive(e: Expr, sym: char) -> Expr {
 mod test {
 
     use super::*;
+    use crate::expr::simplify::*;
 
     #[test]
     fn derive_tangent_test() {
@@ -129,6 +130,10 @@ mod test {
         // f(x)/g(x) = f'g - g'f / g^2
         let f1 = tan(var('x')); // tan(x) => sin(x) / cos(x)
         let derivative = derive(f1, 'x');
+	let simple_deriv = simplify(derivative);
+
+	let expected = con(1.0) / square(cos(var('x')));
+	assert_eq!(simple_deriv, expected, "Uhoh division rule messed up?");
     }
 }
 

@@ -194,6 +194,16 @@ pub fn simplify(e: Expr) -> Expr {
             }
         }, // end division logic
 
+	Pow(ref l, ref r) => {
+	    let left = unpack(l);
+	    let right = unpack(r);
+
+	    match (left, right) {
+		(Const(b), Const(p)) => Const(b.pow(p)),
+		(a, b) => pow(simplify(a), simplify(b)),
+	    }
+	}
+
         _ => e,
     }
 }

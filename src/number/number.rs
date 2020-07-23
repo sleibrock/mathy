@@ -62,6 +62,8 @@ impl Number {
     
     // substitute number functions to cover both real/imag
     // TODO: make these work for complex numbers as well
+    // complex:
+    // sin(z) = sin(x+iy) = sin(x)cosh(y) + icos(x)sinh(y)
     pub fn sin(&self) -> Number { 
         match self {
             Real(x) => Real(x.sin()),
@@ -69,11 +71,20 @@ impl Number {
         }
     }
     
+    // complex:
+    // cos(z) = cos(x+iy) = cos(x)cosh(y) - isin(x)sinh(y)
     pub fn cos(&self) -> Number {
         match self {
             Real(x) => Real(x.cos()),
             _ => Real(0.0),
         }
+    }
+
+    pub fn tan(&self) -> Number {
+	match self {
+	    Real(_) => self.sin() / self.cos(),
+	    _ => Real(0.0),
+	}
     }
 
     pub fn ln(&self) -> Number {
@@ -85,14 +96,26 @@ impl Number {
 
     pub fn pow(&self, other: Number) -> Number {
         match (self, other) {
-            (Real(x), Real(y)) => Real(x.powf(y)),
+	    (Real(base), Real(power)) => {
+		let log_test = power.log2();
+		
+		// check to see if we are raising to a negative power,
+		// which will give us a complex number if the power
+		// is of base log2, ie 1/2, 1/4, 1/8, 1/16, ... etc
+		if *base < 0.0 && log_test < 0.0 && (log_test - log_test.round()) == 0.0 {
+		    let new_base = base.abs();
+		    Complex(0.0, new_base.powf(power))
+		} else {
+		    Real(base.powf(power))
+		}
+	    },
             _ => Real(0.0),
         }
     }
 
-    pub fn powf(&self, other: f64) -> Number {
+    pub fn powf(&self, power: f64) -> Number {
         match self {
-            Real(x) => Real(x.powf(other)),
+            Real(_) => self.pow(Real(power)), 
             _ => Real(0.0),
         }
     }
