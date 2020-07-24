@@ -1,5 +1,4 @@
 use mathy::expr::prelude::*;
-use mathy::calc::prelude::*;
 use mathy::analysis::newton::*;
 
 fn main() {

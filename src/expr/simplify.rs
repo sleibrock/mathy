@@ -2,7 +2,7 @@
 
 use crate::expr::expr::*;
 use crate::expr::expr::Expr::*;
-use crate::number::number::Number::*;
+use crate::number::number::*;
 
 
 pub fn simplify(e: Expr) -> Expr {
@@ -183,7 +183,7 @@ pub fn simplify(e: Expr) -> Expr {
                     if x.real_eq(1.0) {
                         simplify(numerator)   
                     } else if x.real_eq(0.0) {
-                        Const(NaN)
+                        Const(nan())
                     } else {
                         div(simplify(numerator), Const(x))
                     }

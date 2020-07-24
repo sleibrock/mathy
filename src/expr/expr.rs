@@ -148,10 +148,10 @@ impl Expr {
 			String::from(format!("{} * {}", a.to_string(), b.to_string()))
 		    },
 		    (Const(a), Var(c)) => {
-			String::from(format!("{}{}", c, a.to_string()))
+			String::from(format!("{}{}", a.to_string(), c))
 		    },
 		    (Var(c), Const(b)) => {
-			String::from(format!("{}{}", c, b.to_string()))
+			String::from(format!("{}{}", b.to_string(), c))
 		    },
 		    (Const(a), b) => {
 			String::from(format!("{} * ({})", a.to_string(), b.to_string()))
@@ -209,7 +209,7 @@ impl Expr {
 	    _ => NaN, 
 	}
     }
-
+    
     pub fn pack(&self) -> E {
         Box::new(self.clone())
     }
@@ -222,109 +222,113 @@ pub fn unpack(e: &E) -> Expr { *(e.clone()) }
 
 // Expr + Expr = Expr
 impl Add for Expr {
-	type Output = Expr;
-	fn add(self, other: Expr) -> Expr {
-		Add(pack(self), pack(other))
-	}
+    type Output = Expr;
+    fn add(self, other: Expr) -> Expr {
+	Add(pack(self), pack(other))
+    }
 }
 
 // f64 + Expr = Expr
 impl Add<Expr> for f64 {
-	type Output = Expr;
-	fn add(self, other: Expr) -> Expr {
-		Add(pack(con(self)), pack(other))
-	}
+    type Output = Expr;
+    fn add(self, other: Expr) -> Expr {
+	Add(pack(con(self)), pack(other))
+    }
 }
 
 // Expr + f64 = Expr
 impl Add<f64> for Expr {
-	type Output = Expr;
-	fn add(self, other: f64) -> Expr {
-		Add(pack(con(other)), pack(self))
-	}
+    type Output = Expr;
+    fn add(self, other: f64) -> Expr {
+	Add(pack(con(other)), pack(self))
+    }
 } 
 
 // Expr - Expr = Expr
 impl Sub for Expr {
-	type Output = Expr;
-	fn sub(self, other: Expr) -> Expr {
-		Sub(pack(self), pack(other))
-	}
+    type Output = Expr;
+    fn sub(self, other: Expr) -> Expr {
+	Sub(pack(self), pack(other))
+    }
 }
 
 // f64 - Expr = Expr
 impl Sub<Expr> for f64 {
-	type Output = Expr;
-	fn sub(self, other: Expr) -> Expr {
-		Sub(pack(con(self)), pack(other))
-	}
+    type Output = Expr;
+    fn sub(self, other: Expr) -> Expr {
+	Sub(pack(con(self)), pack(other))
+    }
 }
 
 // Expr - f64 = Expr
 impl Sub<f64> for Expr {
-	type Output = Expr;
-	fn sub(self, other: f64) -> Expr {
-		Sub(pack(con(other)), pack(self))
-	}
+    type Output = Expr;
+    fn sub(self, other: f64) -> Expr {
+	Sub(pack(con(other)), pack(self))
+    }
 }
 
 // Expr * Expr = Expr
 impl Mul for Expr {
-	type Output = Expr;
-	fn mul(self, other: Expr) -> Expr {
-		Mul(pack(self), pack(other))
-	}
+    type Output = Expr;
+    fn mul(self, other: Expr) -> Expr {
+	Mul(pack(self), pack(other))
+    }
 }
 
 // f64 * Expr = Expr
 impl Mul<Expr> for f64 {
-	type Output = Expr;
-	fn mul(self, other: Expr) -> Expr {
-		Mul(pack(con(self)), pack(other))
-	}
+    type Output = Expr;
+    fn mul(self, other: Expr) -> Expr {
+	Mul(pack(con(self)), pack(other))
+    }
 }
 
 // Expr * f64 = Expr
 impl Mul<f64> for Expr {
-	type Output = Expr;
-	fn mul(self, other: f64) -> Expr {
-		Mul(pack(con(other)), pack(self))
-	}
+    type Output = Expr;
+    fn mul(self, other: f64) -> Expr {
+	Mul(pack(con(other)), pack(self))
+    }
 }
 
 // Expr / Expr = Expr
 impl Div for Expr {
-	type Output = Expr;
-	fn div(self, other: Expr) -> Expr {
-		Div(pack(self), pack(other))
-	}
+    type Output = Expr;
+    fn div(self, other: Expr) -> Expr {
+	Div(pack(self), pack(other))
+    }
 }
 
 // f64 / Expr = Expr
 impl Div<Expr> for f64 {
-	type Output = Expr;
-	fn div(self, other: Expr) -> Expr {
-		Div(pack(con(self)), pack(other))
-	}
+    type Output = Expr;
+    fn div(self, other: Expr) -> Expr {
+	Div(pack(con(self)), pack(other))
+    }
 }
 
 // Expr / f64 = Expr
 impl Div<f64> for Expr {
-	type Output = Expr;
-	fn div(self, other: f64) -> Expr {
-		Div(pack(self), pack(con(other)))
-	}
+    type Output = Expr;
+    fn div(self, other: f64) -> Expr {
+	Div(pack(self), pack(con(other)))
+    }
 }
 
 // -Expr = Expr
 impl Neg for Expr {
-	type Output = Expr;
-	fn neg(self) -> Expr {
-		Mul(pack(con(-1.0)), pack(self))
-	}
+    type Output = Expr;
+    fn neg(self) -> Expr {
+	Mul(pack(con(-1.0)), pack(self))
+    }
 }
 
 pub fn zero()       -> Expr { Const(real(0.0)) }
+pub fn one()        -> Expr { Const(real(1.0)) }
+pub fn two()        -> Expr { Const(real(2.0)) }
+pub fn pi()         -> Expr { Const(real(3.14159265359)) }
+pub fn e()          -> Expr { Const(real(2.71828182845)) }
 pub fn con(v: f64)  -> Expr { Const(real(v)) }
 pub fn var(c: char) -> Expr { Var(c) }
 pub fn neg(e: Expr) -> Expr { Neg(pack(e)) }
