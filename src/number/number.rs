@@ -126,6 +126,26 @@ impl Number {
             _ => Real(0.0),
         }
     }
+
+    pub fn conjugate(&self) -> Number {
+	match self {
+	    Real(x) => Real(*x),
+	    Complex(z, i) => Complex(*z, -i),
+	}
+    }
+
+    pub fn reciprocal(&self) -> Number {
+	match self {
+	    Real(x) => Real(1.0 / x),
+	    Complex(x, y) => {
+		let d = (x*x)+(y*y);
+		if d <= 0.0 {
+		    panic!("Complex division by zero!!")
+		}
+		Complex(x/d, -(y/d))
+	    },
+	}
+    }
 }
 
 // TODO: finish arithmetic for pretty much everything
@@ -134,7 +154,9 @@ impl Add for Number {
     fn add(self, other: Number) -> Number {
         match (self, other) {
             (Real(x), Real(y)) => Real(x + y),
-            _ => Real(0.0),
+            (Real(x), Complex(z, i)) => Complex(x + z, i),
+	    (Complex(z, i), Real(x)) => Complex(x + z, i),
+	    (Complex(z1, i1), Complex(z2, i2)) => Complex(z1 + z2, i1 + i2),
         }
     }
 }
@@ -144,7 +166,9 @@ impl Sub for Number {
     fn sub(self, other: Number) -> Number {
         match (self, other) {
             (Real(x), Real(y)) => Real(x - y),
-            _ => Real(0.0),
+            (Real(x), Complex(z, i)) => Complex(x - z, i),
+	    (Complex(z, i), Real(x)) => Complex(x - z, i),
+	    (Complex(z1, i1), Complex(z2, i2)) => Complex(z1 - z2, i1 - i2),
         }
     }
 }
@@ -154,7 +178,9 @@ impl Mul for Number {
     fn mul(self, other: Number) -> Number {
         match (self, other) {
             (Real(x), Real(y)) => Real(x * y),
-            _ => Real(0.0),
+	    (Real(x), Complex(u, v)) => Complex(x*u, x*v),
+	    (Complex(x, y), Real(u)) => Complex(x*u, y*u),
+	    (Complex(x, y), Complex(u, v)) => Complex(x*u-y*v, x*v+y*u),
         }
     }
 }
@@ -165,11 +191,31 @@ impl Div for Number {
         match (self, other) {
             (Real(x), Real(y)) => {
                 if y == 0.0 {
-                    panic!("Division by zero!")
+                    panic!("Division by zero!");
                 }
                 Real(x / y)
             },
-            _ => Real(0.0),
+	    (Real(u), Complex(x, y)) => {
+		let d = x*x + y*y;
+		if d == 0.0 {
+		    panic!("Complex Division by zero!");
+		}
+		Complex((u*x)/d, -(u*y)/d)
+	    },
+	    (Complex(u, v), Real(x)) => {
+		let d = x*x;
+		if d == 0.0 {
+		    panic!("(Complex) Division by zero!");
+		}
+		Complex((u*x)/d, -(v*x)/d)
+	    },
+	    (Complex(u, v), Complex(x, y)) => {
+		let d = (x*x) + (y*y);
+		if d == 0.0 {
+		    panic!("Complex Division by zero!");
+		}
+		Complex((u*x+v*y)/d, (v*x-u*y)/d)
+	    },
         }
     }
 }
