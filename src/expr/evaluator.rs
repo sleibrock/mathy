@@ -22,7 +22,6 @@ pub fn evaluate(e: Expr, sym: char, v: Number) -> Expr {
         Add(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, v);
             let right = evaluate(unpack(r), sym, v);
-
             match (left, right) {
                 (Const(lv), Const(rv)) => Const(lv + rv),
                 (a,b) => add(a, b),
@@ -32,7 +31,6 @@ pub fn evaluate(e: Expr, sym: char, v: Number) -> Expr {
         Sub(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, v);
             let right = evaluate(unpack(r), sym, v);
-
             match (left, right) {
                 (Const(lv), Const(rv)) => Const(lv - rv),
                 (a,b) => sub(a, b),
@@ -52,7 +50,6 @@ pub fn evaluate(e: Expr, sym: char, v: Number) -> Expr {
         Div(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, v);
             let right = evaluate(unpack(r), sym, v);
-
             match (left, right) {
                 (Const(lv), Const(rv)) => Const(lv / rv), 
                 (a,b) => div(a, b),
@@ -61,7 +58,6 @@ pub fn evaluate(e: Expr, sym: char, v: Number) -> Expr {
 
         Sin(ref i) => {
             let inner = evaluate(unpack(i), sym, v);
-
             match inner {
                 Const(x) => Const(x.sin()),
                 a => sin(a),
@@ -70,12 +66,64 @@ pub fn evaluate(e: Expr, sym: char, v: Number) -> Expr {
 
         Cos(ref i) => {
             let inner = evaluate(unpack(i), sym, v);
-
             match inner {
                 Const(x) => Const(x.cos()),
                 a => cos(a),
             }
         },
+
+	Sinh(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    match inner {
+		Const(x) => Const(x.sinh()),
+		a => sinh(a),
+	    }
+	},
+
+
+	Cosh(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    match inner {
+		Const(x) => Const(x.sinh()),
+		a => sinh(a),
+	    }
+	},
+
+
+	Asin(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    match inner {
+		Const(x) => Const(x.sinh()),
+		a => sinh(a),
+	    }
+	},
+
+
+	Acos(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    match inner {
+		Const(x) => Const(x.sinh()),
+		a => sinh(a),
+	    }
+	},
+
+
+	Asinh(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    match inner {
+		Const(x) => Const(x.sinh()),
+		a => sinh(a),
+	    }
+	},
+
+
+	Acosh(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+	    match inner {
+		Const(x) => Const(x.sinh()),
+		a => sinh(a),
+	    }
+	},
 
 	Pow(ref l, ref r) => {
 	    let left = evaluate(unpack(l), sym, v);

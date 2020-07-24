@@ -93,7 +93,7 @@ impl Number {
 
     pub fn tan(&self) -> Number {
 	match self {
-	    Real(_) => self.sin() / self.cos(),
+	    Real(x) => Real(x.tan()),
 	    _ => Real(0.0),
 	}
     }
@@ -136,6 +136,77 @@ impl Number {
             Real(x) => Real(x.exp()),
             _ => Real(0.0),
         }
+    }
+
+    // TODO: finish off even more of these functions
+    pub fn sinh(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.sinh()),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn cosh(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.cosh()),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn tanh(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.tanh()),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn asin(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.asin()),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn acos(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.acos()),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn atan(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.atan()),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn atan2(&self, other: Number) -> Number {
+	match (self, other) {
+	    (Real(x), Real(y)) => Real(x.atan2(y)),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn asinh(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.asinh()),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn acosh(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.acosh()),
+	    _ => Real(0.0),
+	}
+    }
+
+    pub fn atanh(&self) -> Number {
+	match self {
+	    Real(x) => Real(x.atanh()),
+	    _ => Real(0.0),
+	}
     }
 
     pub fn conjugate(&self) -> Number {

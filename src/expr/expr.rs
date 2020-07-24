@@ -20,6 +20,12 @@ pub enum Expr {
     Pow(E, E),
     Sin(E),
     Cos(E),
+    Sinh(E),
+    Cosh(E),
+    Asin(E),
+    Acos(E),
+    Asinh(E),
+    Acosh(E),
     Ln(E),
     Exp(E),
 }
@@ -80,6 +86,12 @@ impl Expr {
             Exp(ref i) => exp(i.substitute(sym1, sym2)),
             Sin(ref i) => sin(i.substitute(sym1, sym2)),
             Cos(ref i) => cos(i.substitute(sym1, sym2)),
+            Sinh(ref i) => sinh(i.substitute(sym1, sym2)),
+            Cosh(ref i) => cosh(i.substitute(sym1, sym2)),
+            Asin(ref i) => asin(i.substitute(sym1, sym2)),
+            Acos(ref i) => acos(i.substitute(sym1, sym2)),
+            Asinh(ref i) => asinh(i.substitute(sym1, sym2)),
+            Acosh(ref i) => acosh(i.substitute(sym1, sym2)),
             Add(ref l, ref r) => add(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
             Sub(ref l, ref r) => sub(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
             Mul(ref l, ref r) => mul(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
@@ -98,6 +110,12 @@ impl Expr {
             Exp(ref i) => String::from(format!("e^({})",  i.to_string())),
             Sin(ref i) => String::from(format!("sin({})", i.to_string())),
             Cos(ref i) => String::from(format!("cos({})", i.to_string())),
+	    Sinh(ref i) => String::from(format!("sinh({})", i.to_string())),
+	    Cosh(ref i) => String::from(format!("cosh({})", i.to_string())),
+	    Asin(ref i) => String::from(format!("asin({})", i.to_string())),
+	    Acos(ref i) => String::from(format!("acos({})", i.to_string())),
+	    Asinh(ref i) => String::from(format!("asinh({})", i.to_string())),
+	    Acosh(ref i) => String::from(format!("acosh({})", i.to_string())),
             Add(ref l, ref r) => {
 		let left = unpack(l);
 		let right = unpack(r);
@@ -345,6 +363,12 @@ pub fn square(e: Expr) -> Expr { powf(e, 2.0) }
 pub fn cube(e: Expr)   -> Expr { powf(e, 3.0) }
 pub fn sin(e: Expr)    -> Expr { Sin(pack(e)) }
 pub fn cos(e: Expr)    -> Expr { Cos(pack(e)) }
+pub fn sinh(e: Expr)   -> Expr { Sinh(pack(e)) }
+pub fn cosh(e: Expr)   -> Expr { Cosh(pack(e)) }
+pub fn asin(e: Expr)   -> Expr { Asin(pack(e)) }
+pub fn acos(e: Expr)   -> Expr { Acos(pack(e)) }
+pub fn asinh(e: Expr)  -> Expr { Asinh(pack(e)) }
+pub fn acosh(e: Expr)  -> Expr { Acosh(pack(e)) }
 pub fn tan(e: Expr)    -> Expr {
     let e2 = e.clone();
     div(sin(e), cos(e2))
