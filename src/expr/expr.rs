@@ -114,6 +114,9 @@ impl Expr {
 		    (a, Const(b)) => {
 			String::from(format!("({}) + {}", a.to_string(), b.to_string()))
 		    },
+		    (Var(c), b) => {
+			String::from(format!("{} + ({})", c, b.to_string()))
+		    },
 		    (a, b) => {
 			String::from(format!("({}) + ({})", a.to_string(), b.to_string()))
 		    }
@@ -132,6 +135,9 @@ impl Expr {
 		    (a, Const(b)) => {
 			String::from(format!("({}) - {}", a.to_string(), b.to_string()))
 		    },
+		    (Var(c), b) => {
+			String::from(format!("{} - ({})", c, b.to_string()))
+		    },
 		    (a, b) => {
 			String::from(format!("({}) - ({})", a.to_string(), b.to_string()))
 		    }
@@ -149,6 +155,12 @@ impl Expr {
 		    },
 		    (a, Const(b)) => {
 			String::from(format!("({}) * {}", a.to_string(), b.to_string()))
+		    },
+		    (Var(c), Const(b)) => {
+			String::from(format!("{}{}", c, b.to_string()))
+		    },
+		    (Const(a), Var(c)) => {
+			String::from(format!("{}{}", c, a.to_string()))
 		    },
 		    (a, b) => {
 			String::from(format!("({}) * ({})", a.to_string(), b.to_string()))
@@ -192,6 +204,14 @@ impl Expr {
 		}
             },
         }
+    }
+
+    pub fn extract(&self) -> Number {
+	match self {
+	    Const(c) => { *c },
+	    _ => NaN, // whatever didn't evaluate... well it's not a number
+	    
+	}
     }
 
     pub fn pack(&self) -> E {

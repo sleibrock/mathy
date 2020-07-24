@@ -104,6 +104,24 @@ pub fn derive(e: Expr, sym: char) -> Expr {
                 },
             }
         },
+
+	Pow(ref l, ref r) => {
+	    let left = unpack(l);
+	    let right = unpack(r);
+
+	    match (left, right) {
+		(f, Const(n)) => {
+		    let fp = derive(f.clone(), sym);
+		    let np = n.clone().real() - 1.0;
+
+		    mul(mul(Const(n), pow(f, con(np))), fp)
+		},
+		(f, g) => {
+		    mul(f, g)
+		}
+
+	    }
+	},
         
         _ => NaN,
     }
@@ -117,6 +135,15 @@ mod test {
 
     use super::*;
     use crate::expr::simplify::*;
+
+    #[test]
+    fn derive_square_test() {
+	let square = powf(var('x'), 2.0);
+	let deriv = con(2.0) * var('x');
+	let square_d = simplify(derive(square, 'x'));
+
+	assert_eq!(deriv, square_d);
+    }
 
     #[test]
     fn derive_tangent_test() {

@@ -252,4 +252,16 @@ mod test {
 	assert_eq!(r1+r2, r3);
     }
 
+    #[test]
+    fn complex_division_test() {
+	// 3+4j / 2+5j = 3+7j
+	let c1 = complex(3.0, 4.0);
+	let c2 = complex(2.0, 2.0);
+	let c3 = complex(1.75, 0.25);
+
+	assert_eq!(c1/c2, c3);
+    }
+
 }
+
+// end src/number/number.rs

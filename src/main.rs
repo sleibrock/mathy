@@ -1,14 +1,11 @@
 use mathy::expr::prelude::*;
 use mathy::calc::prelude::*;
-use mathy::analysis::limit::*;
+use mathy::analysis::newton::*;
 
 fn main() {
-    let myexp = 1.0 / var('x'); 
-    println!("f(x) = {}", myexp.to_string());
+    let sqrt = powf(var('x'), 2.0) - con(612.0);
 
-    let deriv = derive(myexp, 'x');
-    let finalresult = simplify(deriv);
-    println!("f'(x) = {}", finalresult.to_string());
+    println!("{:?}", sqrt);
 
-    limit(finalresult.clone(), 'x', 0.0, 5);
+    newton(sqrt, 'x', 10.0, 10);
 }

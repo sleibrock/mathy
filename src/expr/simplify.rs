@@ -199,6 +199,13 @@ pub fn simplify(e: Expr) -> Expr {
 	    let right = unpack(r);
 
 	    match (left, right) {
+		(a, Const(b)) => {
+		    if b.real_eq(1.0) {
+			simplify(a)
+		    } else {
+			pow(simplify(a), simplify(Const(b)))
+		    }
+		}
 		(Const(b), Const(p)) => Const(b.pow(p)),
 		(a, b) => pow(simplify(a), simplify(b)),
 	    }
