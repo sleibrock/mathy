@@ -225,12 +225,13 @@ impl Neg for Number {
     fn neg(self) -> Number {
         match self {
             Real(x) => Real(-x),
-            _ => Real(0.0),
+            Complex(z, i) => Complex(-z, -i),
         }
     }
 }
 
 
+// Shortcut functions for ease of use
 pub fn real(x: f64) -> Number { Real(x) }
 pub fn imag(x: f64) -> Number { Complex(0.0, x) }
 pub fn complex(x: f64, z: f64) -> Number {
@@ -247,6 +248,8 @@ mod test {
         let r1 = real(2.0);
         let r2 = real(3.0);
         let r3 = real(5.0);
+
+	assert_eq!(r1+r2, r3);
     }
 
 }
