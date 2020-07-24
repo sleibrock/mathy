@@ -4,16 +4,25 @@ use std::ops::{Add,Sub,Mul,Div,Neg};
 
 use self::Number::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Number {
+    NaN,
     Real(f64),
     Complex(f64, f64),
 }
 
 // Defining our own number enumeration
 impl Number {
+    pub fn is_nan(&self) -> bool {
+	match self {
+	    NaN => true,
+	    _ => false,
+	}
+    }
+
     pub fn is_zero(&self) -> bool {
         match self {
+	    NaN => false,
             Real(x) => *x == 0.0,
             Complex(x, z) => *x == 0.0 && *z == 0.0,
         }
@@ -21,6 +30,7 @@ impl Number {
 
     pub fn real(&self) -> f64 {
         match self {
+	    NaN => 0.0,
             Real(x) => *x,
             Complex(r, _) => *r,
         }
@@ -35,6 +45,7 @@ impl Number {
 
     pub fn to_string(&self) -> String {
         match self {
+	    NaN => "NaN".into(),
             Real(x) => format!("{}", x),
             Complex(x, z) => {
                 if *z < 0.0 {
@@ -131,6 +142,7 @@ impl Number {
 	match self {
 	    Real(x) => Real(*x),
 	    Complex(z, i) => Complex(*z, -i),
+	    _ => NaN,
 	}
     }
 
@@ -144,6 +156,7 @@ impl Number {
 		}
 		Complex(x/d, -(y/d))
 	    },
+	    _ => NaN,
 	}
     }
 }
@@ -157,6 +170,7 @@ impl Add for Number {
             (Real(x), Complex(z, i)) => Complex(x + z, i),
 	    (Complex(z, i), Real(x)) => Complex(x + z, i),
 	    (Complex(z1, i1), Complex(z2, i2)) => Complex(z1 + z2, i1 + i2),
+	    _ => NaN,
         }
     }
 }
@@ -169,6 +183,7 @@ impl Sub for Number {
             (Real(x), Complex(z, i)) => Complex(x - z, i),
 	    (Complex(z, i), Real(x)) => Complex(x - z, i),
 	    (Complex(z1, i1), Complex(z2, i2)) => Complex(z1 - z2, i1 - i2),
+	    _ => NaN,
         }
     }
 }
@@ -181,6 +196,7 @@ impl Mul for Number {
 	    (Real(x), Complex(u, v)) => Complex(x*u, x*v),
 	    (Complex(x, y), Real(u)) => Complex(x*u, y*u),
 	    (Complex(x, y), Complex(u, v)) => Complex(x*u-y*v, x*v+y*u),
+	    _ => NaN,
         }
     }
 }
@@ -191,31 +207,32 @@ impl Div for Number {
         match (self, other) {
             (Real(x), Real(y)) => {
                 if y == 0.0 {
-                    panic!("Division by zero!");
+		    return NaN;
                 }
                 Real(x / y)
             },
 	    (Real(u), Complex(x, y)) => {
 		let d = x*x + y*y;
 		if d == 0.0 {
-		    panic!("Complex Division by zero!");
+		    return NaN;
 		}
 		Complex((u*x)/d, -(u*y)/d)
 	    },
 	    (Complex(u, v), Real(x)) => {
 		let d = x*x;
 		if d == 0.0 {
-		    panic!("(Complex) Division by zero!");
+		    return NaN;
 		}
 		Complex((u*x)/d, -(v*x)/d)
 	    },
 	    (Complex(u, v), Complex(x, y)) => {
 		let d = (x*x) + (y*y);
 		if d == 0.0 {
-		    panic!("Complex Division by zero!");
+		    return NaN;
 		}
 		Complex((u*x+v*y)/d, (v*x-u*y)/d)
 	    },
+	    _ => NaN,
         }
     }
 }
@@ -226,12 +243,14 @@ impl Neg for Number {
         match self {
             Real(x) => Real(-x),
             Complex(z, i) => Complex(-z, -i),
+	    _ => NaN,
         }
     }
 }
 
 
 // Shortcut functions for ease of use
+pub fn nan() -> Number { NaN }
 pub fn real(x: f64) -> Number { Real(x) }
 pub fn imag(x: f64) -> Number { Complex(0.0, x) }
 pub fn complex(x: f64, z: f64) -> Number {

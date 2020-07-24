@@ -3,14 +3,13 @@
 use std::ops::{Add,Sub,Mul,Div,Neg};
 
 use crate::number::number::*;
-//use crate::number::number::Number::*;
+use crate::number::number::Number::*;
 
 pub type E = Box<Expr>;
 
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
-    NaN,
     Const(Number),
     Var(char),
     Neg(E),
@@ -44,7 +43,6 @@ impl Expr {
 
     pub fn is_op(&self) -> bool {
         match self {
-            NaN => false,
             Const(_) => false,
             Var(_) => false,
             _ => true,
@@ -64,7 +62,7 @@ impl Expr {
             Mul(ref l, ref r) => { l.has_var(s) || r.has_var(s) },
             Div(ref l, ref r) => { l.has_var(s) || r.has_var(s) },
             Pow(ref l, ref r) => { l.has_var(s) || r.has_var(s) },
-            _ => false,
+	    _ => false,
         }
     }
 
@@ -93,7 +91,6 @@ impl Expr {
 
     pub fn to_string(&self) -> String {
         match self {
-            NaN      => String::from("NaN"),
             Const(c) => String::from(format!("{}", c.to_string())),
             Var(s)   => String::from(format!("{}", s)),
             Neg(ref i) => String::from(format!("-({})",   i.to_string())),
@@ -150,17 +147,17 @@ impl Expr {
 		    (Const(a), Const(b)) => {
 			String::from(format!("{} * {}", a.to_string(), b.to_string()))
 		    },
+		    (Const(a), Var(c)) => {
+			String::from(format!("{}{}", c, a.to_string()))
+		    },
+		    (Var(c), Const(b)) => {
+			String::from(format!("{}{}", c, b.to_string()))
+		    },
 		    (Const(a), b) => {
 			String::from(format!("{} * ({})", a.to_string(), b.to_string()))
 		    },
 		    (a, Const(b)) => {
 			String::from(format!("({}) * {}", a.to_string(), b.to_string()))
-		    },
-		    (Var(c), Const(b)) => {
-			String::from(format!("{}{}", c, b.to_string()))
-		    },
-		    (Const(a), Var(c)) => {
-			String::from(format!("{}{}", c, a.to_string()))
 		    },
 		    (a, b) => {
 			String::from(format!("({}) * ({})", a.to_string(), b.to_string()))
@@ -209,8 +206,7 @@ impl Expr {
     pub fn extract(&self) -> Number {
 	match self {
 	    Const(c) => { *c },
-	    _ => NaN, // whatever didn't evaluate... well it's not a number
-	    
+	    _ => NaN, 
 	}
     }
 
@@ -328,7 +324,6 @@ impl Neg for Expr {
 	}
 }
 
-pub fn nan()        -> Expr { NaN }
 pub fn zero()       -> Expr { Const(real(0.0)) }
 pub fn con(v: f64)  -> Expr { Const(real(v)) }
 pub fn var(c: char) -> Expr { Var(c) }

@@ -7,7 +7,6 @@ use crate::expr::expr::Expr::*;
 /// Hold other variables constant at zero.
 pub fn derive(e: Expr, sym: char) -> Expr {
     match e {
-        NaN => NaN,
         Const(_) => con(0.0),
         Var(s) => {
             if s == sym {
@@ -123,7 +122,7 @@ pub fn derive(e: Expr, sym: char) -> Expr {
 	    }
 	},
         
-        _ => NaN,
+        _ => con(0.0),
     }
 
 }

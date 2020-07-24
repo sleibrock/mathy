@@ -2,8 +2,7 @@
 
 use crate::expr::expr::*;
 use crate::expr::expr::Expr::*;
-//use crate::number::number::*;
-//use crate::number::number::Number::*;
+use crate::number::number::Number::*;
 
 
 pub fn simplify(e: Expr) -> Expr {
@@ -184,7 +183,7 @@ pub fn simplify(e: Expr) -> Expr {
                     if x.real_eq(1.0) {
                         simplify(numerator)   
                     } else if x.real_eq(0.0) {
-                        NaN
+                        Const(NaN)
                     } else {
                         div(simplify(numerator), Const(x))
                     }
@@ -199,6 +198,7 @@ pub fn simplify(e: Expr) -> Expr {
 	    let right = unpack(r);
 
 	    match (left, right) {
+		(Const(b), Const(p)) => Const(b.pow(p)),
 		(a, Const(b)) => {
 		    if b.real_eq(1.0) {
 			simplify(a)
@@ -206,7 +206,6 @@ pub fn simplify(e: Expr) -> Expr {
 			pow(simplify(a), simplify(Const(b)))
 		    }
 		}
-		(Const(b), Const(p)) => Const(b.pow(p)),
 		(a, b) => pow(simplify(a), simplify(b)),
 	    }
 	}
