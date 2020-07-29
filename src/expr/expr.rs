@@ -1,9 +1,8 @@
 // src/calc/expr.rs
 
 use std::ops::{Add,Sub,Mul,Div,Neg};
-
 use crate::number::number::*;
-use crate::number::number::Number::*;
+
 
 pub type E = Box<Expr>;
 
@@ -255,13 +254,6 @@ impl Expr {
 	}
     }
 
-    pub fn extract(&self) -> Number {
-	match self {
-	    Const(c) => { *c },
-	    _ => NaN, 
-	}
-    }
-    
     /// A quick way of wrapping an Expr type into a Box.
     /// Use this to chain Expr calls to wrap into a box quickly
     /// if you don't want to use the shortcut `pack()` function.

@@ -6,160 +6,103 @@ use crate::number::number::*;
 //use crate::number::number::Number::*;
 
 // execute a one-var evaluation on an expression tree
-pub fn evaluate(e: Expr, sym: char, v: Number) -> Expr {
+pub fn evaluate(e: Expr, sym: char, v: Number) -> Number {
     match e {
-        Const(c) => Const(c),
-        Var(x) if x == sym => Const(v), 
+        Const(c) => c,
+        Var(x) if x == sym => v, 
 		
 	Neg(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    match inner {
-		Const(x) => Const(-x),
-		a => neg(a),
-	    }
+	    -inner
 	},
 
         Add(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, v);
             let right = evaluate(unpack(r), sym, v);
-            match (left, right) {
-                (Const(lv), Const(rv)) => Const(lv + rv),
-                (a,b) => add(a, b),
-            }
+	    left + right
         },
 
         Sub(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, v);
             let right = evaluate(unpack(r), sym, v);
-            match (left, right) {
-                (Const(lv), Const(rv)) => Const(lv - rv),
-                (a,b) => sub(a, b),
-            }
+	    left - right
         },
 
         Mul(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, v);
             let right = evaluate(unpack(r), sym, v);
-
-            match (left, right) {
-                (Const(lv), Const(rv)) => Const(lv * rv),
-                (a,b) => mul(a, b),
-            }
+	    left * right
         },
 
         Div(ref l, ref r) => {
             let left = evaluate(unpack(l), sym, v);
             let right = evaluate(unpack(r), sym, v);
-            match (left, right) {
-                (Const(lv), Const(rv)) => Const(lv / rv), 
-                (a,b) => div(a, b),
-            }
+	    left / right
         },
 
         Sin(ref i) => {
             let inner = evaluate(unpack(i), sym, v);
-            match inner {
-                Const(x) => Const(x.sin()),
-                a => sin(a),
-            }
+	    inner.sin()
         },
 
         Cos(ref i) => {
             let inner = evaluate(unpack(i), sym, v);
-            match inner {
-                Const(x) => Const(x.cos()),
-                a => cos(a),
-            }
+	    inner.cos()
         },
 
 	Sinh(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    match inner {
-		Const(x) => Const(x.sinh()),
-		a => sinh(a),
-	    }
+	    inner.sinh()
 	},
-
 
 	Cosh(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    match inner {
-		Const(x) => Const(x.sinh()),
-		a => sinh(a),
-	    }
+	    inner.cosh()
 	},
 
 
 	Asin(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    match inner {
-		Const(x) => Const(x.sinh()),
-		a => sinh(a),
-	    }
+	    inner.asin()
 	},
 
 
 	Acos(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    match inner {
-		Const(x) => Const(x.sinh()),
-		a => sinh(a),
-	    }
+	    inner.acos()
 	},
 
 
 	Asinh(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    match inner {
-		Const(x) => Const(x.sinh()),
-		a => sinh(a),
-	    }
+	    inner.asinh()
 	},
 
 
 	Acosh(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    match inner {
-		Const(x) => Const(x.sinh()),
-		a => sinh(a),
-	    }
+	    inner.acosh()
 	},
 
 	Pow(ref l, ref r) => {
 	    let left = evaluate(unpack(l), sym, v);
 	    let right = evaluate(unpack(r), sym, v);		
-	    
-	    match (left, right) {
-		(Const(x), Const(y)) => Const(x.pow(y)),
-		(a,b) => Pow(pack(a), pack(b)),
-	    }
-	},
+	    left.pow(right)
+	}
 	
 	Exp(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    
-	    match inner {
-		Const(x) => Const(x.exp()),
-		a => exp(a)
-	    }
+	    inner.exp()
 	},
 	
 	Ln(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-	    
-	    match inner {
-		Const(x) => Const(x.ln()),
-		a => ln(a),
-	    }
+	    inner.ln()
 	},
 
 	Factorial(ref i) => {
 	    let inner = evaluate(unpack(i), sym, v);
-
-	    match inner {
-		Const(x) => Const(x.factorial()),
-		a => factorial(a),
-	    }
+	    inner.factorial()
 	},
 
 	/*
@@ -168,7 +111,8 @@ pub fn evaluate(e: Expr, sym: char, v: Number) -> Expr {
 	},
 	*/
 
-	f => f,
+	// Leftover, can't evaluate?
+	_ => nan(), 
     }
 }
 

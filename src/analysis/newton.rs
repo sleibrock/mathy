@@ -12,7 +12,7 @@ pub fn newton(f: Expr, sym: char, guess: f64, iters: usize) {
     for x in 0..iters {
 	let x1 = evaluate(e.clone(), sym, xp);
 	println!("cycle {}: {}", x, x1.to_string());
-	xp = x1.extract();
+	xp = x1;
     }
 }
 
