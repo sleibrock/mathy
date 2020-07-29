@@ -208,7 +208,19 @@ pub fn simplify(e: Expr) -> Expr {
 		}
 		(a, b) => pow(simplify(a), simplify(b)),
 	    }
-	}
+	},
+
+	Exp(ref i) => {
+	    let inner = unpack(i);
+
+	    match inner {
+		// e^x and ln(x) are inverse functions
+		Ln(ref a) => {
+		    unpack(a)
+		} 
+		a => exp(a),
+	    }
+	},
 
         _ => e,
     }

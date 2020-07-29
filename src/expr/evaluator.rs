@@ -125,29 +125,29 @@ mod test {
     fn evaluate_test() {
         let expr = add(con(3.0), var('x'));
         let value = evaluate(expr, 'x', real(7.0));
-        assert_eq!(con(10.0), value);
+        assert_eq!(real(10.0), value);
     }
 
     #[test]
     fn square_test() {
 	let f = powf(var('x'), 2.0);
 	let v = evaluate(f, 'x', real(7.0));
-	assert_eq!(con(49.0), v);
+	assert_eq!(real(49.0), v);
     }
 
     #[test]
     fn test_complex_sqrt() {
 	let expr = sqrt(var('x'));
 	let value = evaluate(expr, 'x', real(-1.0));
-	assert_eq!(value, Const(complex(0.0, 1.0)));
+	assert_eq!(value, complex(0.0, 1.0));
 
 	let expr2 = sqrt(var('x'));
 	let value2 = evaluate(expr2, 'x', real(-3.0));
-	assert_eq!(value2, Const(complex(0.0, 1.7320508075688772)));
+	assert_eq!(value2, complex(0.0, 1.7320508075688772));
 
 	let expr3 = sqrt(var('x'));
 	let value3 = evaluate(expr3, 'x', real(-4.0));
-	assert_eq!(value3, Const(complex(0.0, 2.0)));
+	assert_eq!(value3, complex(0.0, 2.0));
     }
 }
 

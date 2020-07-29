@@ -109,6 +109,17 @@ pub fn derive(e: Expr, sym: char) -> Expr {
 	    let right = unpack(r);
 
 	    match (left, right) {
+		// var raised to a power
+		(Var(c), Const(n)) if c == sym => {
+		    if n.real_eq(1.0) {
+			con(0.0)
+		    } else if n.real_eq(2.0) {
+			varf(sym, 2.0)
+		    } else {
+			Const(n) * Pow(pack(Var(sym)), pack(con(n.real()-1.0)))
+		    }
+		},
+		// function raised to a power
 		(f, Const(n)) => {
 		    let fp = derive(f.clone(), sym);
 		    let np = n.clone().real() - 1.0;
@@ -121,6 +132,19 @@ pub fn derive(e: Expr, sym: char) -> Expr {
 
 	    }
 	},
+
+	Exp(ref i) => {
+	    let inner = unpack(i);
+
+	    match inner {
+		Const(_) => con(0.0), 
+		Var(c) if c == sym => exp(var(sym)),
+		f => {
+		    let fp = derive(f.clone(), sym);
+		    mul(fp, exp(f.clone()))
+		}
+	    }
+	}
 
         _ => con(0.0),
     }
@@ -160,6 +184,16 @@ mod test {
 
 	let expected = con(1.0) / square(cos(var('x')));
 	assert_eq!(simple_deriv, expected, "Uhoh division rule messed up?");
+    }
+
+    #[test]
+    fn derive_exp_funcs() {
+	// Will require more tests but this is basic enough for now
+	let f1 = exp(powf(var('x'), 2.0));
+	let f2 = varf('x', 2.0) * exp(powf(var('x'), 2.0));
+	let f1d = derive(f1, 'x');
+
+	assert_eq!(f1d, f2);
     }
 }
 

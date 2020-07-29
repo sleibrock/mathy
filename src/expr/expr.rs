@@ -127,6 +127,7 @@ impl Expr {
     /// Use this if you want better formula visualization.
     ///
     /// ```
+    /// use mathy::calc::prelude::*;
     /// let e1 = var('x') * con(2.0);
     /// println!("My equation: {}", e1.to_string());
     /// // use this for raw debugging
