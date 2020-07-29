@@ -16,6 +16,16 @@ pub fn derive(e: Expr, sym: char) -> Expr {
             }
         },
 
+	Neg(ref i) => {
+	    let inner = unpack(i);
+
+	    match inner {
+		Const(_) => con(0.0),
+		Var(c) if c == sym => neg(con(1.0)),
+		f => neg(derive(f, sym)),
+	    }
+	},
+
         Add(ref l, ref r) => {
             let left = unpack(l);
             let right = unpack(r);
@@ -33,20 +43,8 @@ pub fn derive(e: Expr, sym: char) -> Expr {
             let right = unpack(r);
 
             match (left, right) {
-                (Const(x), Var(s)) => {
-                    if s == sym {
-                        Const(x)
-                    } else {
-                        con(0.0)
-                    }
-                },
-                (Var(s), Const(x)) => {
-                    if s == sym {
-                        Const(x)
-                    } else {
-                        con(0.0)
-                    }
-                },
+                (Const(x), Var(s)) if s == sym => Const(x),
+                (Var(s), Const(x)) if s == sym => Const(x), 
                 (a, b) => {
                     let a1 = a.clone();
                     let b1 = b.clone();
@@ -72,6 +70,7 @@ pub fn derive(e: Expr, sym: char) -> Expr {
             let inner = unpack(i);
 
             match inner {
+		Const(_) => con(0.0), 
                 Var(c) => {
                     if c == sym {
                         cos(var(c))
@@ -90,6 +89,7 @@ pub fn derive(e: Expr, sym: char) -> Expr {
             let inner = unpack(i);
 
             match inner {
+		Const(_) => con(0.0), 
                 Var(c) => {
                     if c == sym {
                         neg(sin(var(c)))
