@@ -7,7 +7,13 @@ use crate::number::number::Number::*;
 
 pub type E = Box<Expr>;
 
-
+/// Expr enum type representing all mathematical operations.
+/// For recursive enumerations, any children nodes must be
+/// boxed for Rust sizing purposes.
+///
+/// Distinct functions will be used as variants, but
+/// functions which are composed of other functions like
+/// tangent will be reduced to simpler forms currently.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
     Const(Number),
@@ -28,11 +34,20 @@ pub enum Expr {
     Acosh(E),
     Ln(E),
     Exp(E),
+    Factorial(E),
+    Gamma(E),
 }
 
 use self::Expr::*;
 
+/// All Expr methods used to check for certain conditions
+/// and perform certain operations. Evaluation and
+/// simplifying is not done here, but in other source files
+/// due to the length of the code.
 impl Expr {
+
+    /// Check if the top level of the Expr tree
+    /// is a constant value and return true.
     pub fn is_const(&self) -> bool {
         match self {
             Const(_) => true,
@@ -40,6 +55,8 @@ impl Expr {
         }
     }
 
+    /// Check if the top level of the Expr tree
+    /// is a variable and return true.
     pub fn is_var(&self) -> bool {
         match self {
             Var(_) => true,
@@ -47,6 +64,8 @@ impl Expr {
         }
     }
 
+    /// Check if the top level of the Expr tree is
+    /// an an operation and return true.
     pub fn is_op(&self) -> bool {
         match self {
             Const(_) => false,
@@ -55,6 +74,8 @@ impl Expr {
         }
     }
 
+    /// Recursively dive into the Expr tree and see
+    /// if it contains a Var(c) type where c == s.
     pub fn has_var(&self, s: char) -> bool {
         match self {
             Var(x)     => { s == *x },
@@ -72,7 +93,7 @@ impl Expr {
         }
     }
 
-    /// Use this to substitute any variable with another
+    /// Use this to substitute any variable with another recurisvely.
     pub fn substitute(&self, sym1: char, sym2: char) -> Expr {
         match self {
             Var(x) => {
@@ -97,10 +118,21 @@ impl Expr {
             Mul(ref l, ref r) => mul(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
             Div(ref l, ref r) => div(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
             Pow(ref l, ref r) => pow(l.substitute(sym1, sym2), r.substitute(sym1, sym2)),
+
+	    // fallback in case not everything is mapped
             e => e.clone(),
         }
     }
 
+    /// Map an Expr to a String type with recursive formatting.
+    /// Use this if you want better formula visualization.
+    ///
+    /// ```
+    /// let e1 = var('x') * con(2.0);
+    /// println!("My equation: {}", e1.to_string());
+    /// // use this for raw debugging
+    /// println!("My Expr: {:?}", e1);
+    /// ```
     pub fn to_string(&self) -> String {
         match self {
             Const(c) => String::from(format!("{}", c.to_string())),
@@ -214,11 +246,13 @@ impl Expr {
 			String::from(format!("{}^{}", a.to_string(), b.to_string()))
 		    },
 		    (a, b) => {
-			String::from(format!("({}) ^ ({})", a.to_string(), b.to_string()))
+			String::from(format!("({})^({})", a.to_string(), b.to_string()))
 		    }
 		}
             },
-        }
+	    Factorial(ref i) => String::from(format!("({})!", i.to_string())), 
+	    Gamma(ref i) => String::from(format!("Γ({})", i.to_string())),
+	}
     }
 
     pub fn extract(&self) -> Number {
@@ -228,13 +262,28 @@ impl Expr {
 	}
     }
     
+    /// A quick way of wrapping an Expr type into a Box.
+    /// Use this to chain Expr calls to wrap into a box quickly
+    /// if you don't want to use the shortcut `pack()` function.
     pub fn pack(&self) -> E {
         Box::new(self.clone())
     }
 }
 
-// Boxing tools to size out recursive structures
+// Boxing / unboxing functions
+
+/// pack() provides an easy way of turning an Expr item
+/// into a Box<Expr> (or E) type. This is used almost everywhere
+/// in internal shortcut functions and pattern matching to quickly
+/// hop between Boxed and unboxed Expr items.
+///
+/// For most purposes you shouldn't need to worry about this yourself,
+/// as the shortcut functions defined later will do the packing for you.
 pub fn pack(e: Expr) -> E { Box::new(e) }
+
+/// unpack() is a way of unpacking Exprs from boxes.
+/// This is heavily used when unwrapping references in pattern matching
+/// to quickly turn boxed items into Expr types.
 pub fn unpack(e: &E) -> Expr { *(e.clone()) }
 
 
@@ -342,6 +391,19 @@ impl Neg for Expr {
     }
 }
 
+
+// Shortcut functions for quick access
+// These are quick functions to create Expr elements, using very
+// minimal function names for easy writing. With these, expressions
+// can be written as simply as
+// let e1 = var('x') * powf(e(), 2.0) - con(5.0)
+
+// con = constant value
+// var = variable
+// varf = variable that is multiplied by a number
+// pow = power function to raise an Expr by an Expr
+// powf = power function except raise Expr by a float
+
 pub fn zero()       -> Expr { Const(real(0.0)) }
 pub fn one()        -> Expr { Const(real(1.0)) }
 pub fn two()        -> Expr { Const(real(2.0)) }
@@ -384,6 +446,14 @@ pub fn base2(e: Expr) -> Expr {
 
 pub fn base10(e: Expr) -> Expr {
     div(ln(e), ln(con(10.0)))
+}
+
+pub fn factorial(e: Expr) -> Expr {
+    Factorial(pack(e))
+}
+
+pub fn gamma(e: Expr) -> Expr {
+    Gamma(pack(e))
 }
 
 // unit tests and other such things

@@ -153,6 +153,21 @@ pub fn evaluate(e: Expr, sym: char, v: Number) -> Expr {
 	    }
 	},
 
+	Factorial(ref i) => {
+	    let inner = evaluate(unpack(i), sym, v);
+
+	    match inner {
+		Const(x) => Const(x.factorial()),
+		a => factorial(a),
+	    }
+	},
+
+	/*
+	Gamma(ref i) => {
+
+	},
+	*/
+
 	f => f,
     }
 }

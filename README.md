@@ -17,6 +17,7 @@ The end-goal is to have something usable to make solving basic math and physics 
 * Differentiation of Complex-valued (basic) functions
 * Partial derivatives
 * Basic Integration rules
+* Lots of tests!!
 
 
 ## Contributing

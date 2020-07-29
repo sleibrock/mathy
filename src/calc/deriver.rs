@@ -121,7 +121,7 @@ pub fn derive(e: Expr, sym: char) -> Expr {
 
 	    }
 	},
-        
+
         _ => con(0.0),
     }
 

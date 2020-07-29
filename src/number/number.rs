@@ -28,6 +28,14 @@ impl Number {
         }
     }
 
+    pub fn is_whole(&self) -> bool {
+	match self {
+	    NaN => false,
+	    Real(x) => x - (x.round()) == 0.0,
+	    Complex(x, z) => x - (x.round()) == 0.0 && z - (z.round()) == 0.0,
+	}
+    }
+
     pub fn real(&self) -> f64 {
         match self {
 	    NaN => 0.0,
@@ -71,8 +79,9 @@ impl Number {
         }
     }
     
+    // Big TODO: map all these functions onwards to their complex variants // 
+
     // substitute number functions to cover both real/imag
-    // TODO: make these work for complex numbers as well
     // complex:
     // sin(z) = sin(x+iy) = sin(x)cosh(y) + icos(x)sinh(y)
     pub fn sin(&self) -> Number { 
@@ -138,7 +147,6 @@ impl Number {
         }
     }
 
-    // TODO: finish off even more of these functions
     pub fn sinh(&self) -> Number {
 	match self {
 	    Real(x) => Real(x.sinh()),
@@ -209,6 +217,8 @@ impl Number {
 	}
     }
 
+    // Give a complex conjugate of a number
+    // For real numbers this probably doesn't do anything
     pub fn conjugate(&self) -> Number {
 	match self {
 	    Real(x) => Real(*x),
@@ -217,15 +227,47 @@ impl Number {
 	}
     }
 
+    // Give a reciprocal for a given number
     pub fn reciprocal(&self) -> Number {
 	match self {
 	    Real(x) => Real(1.0 / x),
 	    Complex(x, y) => {
 		let d = (x*x)+(y*y);
 		if d <= 0.0 {
-		    panic!("Complex division by zero!!")
+		    return NaN;
 		}
 		Complex(x/d, -(y/d))
+	    },
+	    _ => NaN,
+	}
+    }
+
+    // TODO: add checks for floating point/complex numbers
+    // if given (2.1)! or a complex number z!, defer it
+    // to the Gamma function which uses integral estimation
+    pub fn factorial(&self) -> Number {
+	match self {
+	    Real(x) => {
+		let upper = (x+1.0) as usize;
+		if upper > 100 {
+		    panic!("Factorial too large for data type")
+		}
+		let mut xs : u64 = 1;
+		for i in 1 .. upper {
+		    xs *= i as u64;
+		}
+		Real(xs as f64)
+	    },
+	    Complex(x, z) => complex(*x, *z).gamma(10),
+	    _ => NaN,
+	}
+    }
+
+    // TODO: implement gamma function with estimation
+    pub fn gamma(&self, _iters: usize) -> Number {
+	match self {
+	    Complex(_x, _z) => {
+		real(0.0)
 	    },
 	    _ => NaN,
 	}
@@ -352,6 +394,12 @@ mod test {
 	assert_eq!(c1/c2, c3);
     }
 
+    #[test]
+    fn factorial_test() {
+	let c1 = real(5.0);
+	let c2 = real(120.0);
+	assert_eq!(c2, c1.factorial());
+    }
 }
 
 // end src/number/number.rs
