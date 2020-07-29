@@ -4,6 +4,17 @@ use std::ops::{Add,Sub,Mul,Div,Neg};
 
 use self::Number::*;
 
+/// The primary Number type to use throughout the project.
+/// The Number holds three variants: NaN, Real and Complex.
+/// The `Expr` type will use `Number` as a placeholder for
+/// when equations need to be evaluated.
+///
+/// ```
+/// use mathy::number::number::*;
+/// let ten = real(10.0);
+/// let hundred = ten * ten;
+/// assert_eq!(hundred, real(100.0));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Number {
     NaN,
@@ -13,6 +24,7 @@ pub enum Number {
 
 // Defining our own number enumeration
 impl Number {
+    /// Check if a number is NaN.
     pub fn is_nan(&self) -> bool {
 	match self {
 	    NaN => true,
@@ -20,6 +32,7 @@ impl Number {
 	}
     }
 
+    /// Check if a number is zero (works for both Real/Complex)
     pub fn is_zero(&self) -> bool {
         match self {
 	    NaN => false,
@@ -28,6 +41,10 @@ impl Number {
         }
     }
 
+    /// Check if a number is a whole number (no fractional
+    /// component needed to express the number). This checks
+    /// if all components have no remainder values of 0.0 by doing
+    /// rounded delta checks. NaN will return false.
     pub fn is_whole(&self) -> bool {
 	match self {
 	    NaN => false,
@@ -36,6 +53,7 @@ impl Number {
 	}
     }
 
+    /// Access the raw f64 real component of a Number. NaN will return 0.0
     pub fn real(&self) -> f64 {
         match self {
 	    NaN => 0.0,
@@ -44,6 +62,7 @@ impl Number {
         }
     }
 
+    /// Access the raw f64 imaginary component of a Number. NaN returns 0.0
     pub fn imag(&self) -> f64 {
         match self {
             Complex(_, i) => *i,
@@ -51,6 +70,7 @@ impl Number {
         }
     }
 
+    /// Format a Number into a std::String.
     pub fn to_string(&self) -> String {
         match self {
 	    NaN => "NaN".into(),
@@ -65,6 +85,7 @@ impl Number {
         }
     }
 
+    /// Quick function to compare a Number to an f64
     pub fn real_eq(&self, v: f64) -> bool {
         match self {
             Real(x) => *x == v,
@@ -72,6 +93,7 @@ impl Number {
         }
     }
 
+    /// Another quick function to compare a Number to two f64 values
     pub fn complex_eq(self, v1: f64, v2: f64) -> bool {
         match self {
             Complex(x, z) => x == v1 && z == v2,
@@ -114,6 +136,9 @@ impl Number {
         }
     }
 
+    /// Apply an exponentiation operation to a Number. This can
+    /// result in imaginary numbers based on the power the Number is
+    /// raised to.
     pub fn pow(&self, other: Number) -> Number {
         match (self, other) {
 	    (Real(base), Real(power)) => {
@@ -133,6 +158,9 @@ impl Number {
         }
     }
 
+    /// Raise a Number to a power, except this takes an f64.
+    /// Serves as a shortcut function to avoid having to manually
+    /// wrap floats into Number variants.
     pub fn powf(&self, power: f64) -> Number {
         match self {
             Real(_) => self.pow(Real(power)), 

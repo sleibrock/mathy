@@ -255,6 +255,15 @@ mod test {
         }
     }
 
+    #[test]
+    fn test_e_ln_x() {
+	let input = exp(ln(var('x')));
+	let output = simplify(input);
+	let expected = var('x');
+
+	assert_eq!(output, expected);
+    }
+
 }
 
 

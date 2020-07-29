@@ -5,7 +5,16 @@ use crate::expr::expr::Expr::*;
 use crate::number::number::*;
 //use crate::number::number::Number::*;
 
-// execute a one-var evaluation on an expression tree
+/// Execute an evaluation against a given `Expr` tree.
+/// Takes three arguments; an `Expr` tree, a symbol char,
+/// and a `Number` type. 
+///
+/// ```
+/// use mathy::expr::prelude::*;
+/// let f = powf(var('x'), 2.0);
+/// let y = evaluate(f, 'x', real(10.0));
+/// assert_eq!(y, real(100.0));
+/// ```
 pub fn evaluate(e: Expr, sym: char, v: Number) -> Number {
     match e {
         Const(c) => c,

@@ -43,6 +43,7 @@ pub fn derive(e: Expr, sym: char) -> Expr {
             let right = unpack(r);
 
             match (left, right) {
+		(Const(_), Const(_)) => con(0.0),
                 (Const(x), Var(s)) if s == sym => Const(x),
                 (Var(s), Const(x)) if s == sym => Const(x), 
                 (a, b) => {
