@@ -435,19 +435,19 @@ pub fn tanh(e: Expr) -> Expr {
 }
 pub fn atanh(e: Expr) -> Expr {
     // alternate form is 0.5*log(x+1) - 0.5*log(1-x)
-    sub(mul(con(0.5), log(add(e, con(1.0)))),
-	mul(con(0.5), log(sub(con(1.0), e))))
+    sub(mul(con(0.5), log2(add(e.clone(), con(1.0)))),
+	mul(con(0.5), log2(sub(con(1.0), e.clone()))))
 }
 pub fn ln(e: Expr)     -> Expr { Ln(pack(e)) }
 pub fn log(base: f64, e: Expr) -> Expr {
     div(ln(e), ln(con(base)))
 }
 
-pub fn base2(e: Expr) -> Expr {
+pub fn log2(e: Expr) -> Expr {
     div(ln(e), ln(con(2.0)))
 }
 
-pub fn base10(e: Expr) -> Expr {
+pub fn log10(e: Expr) -> Expr {
     div(ln(e), ln(con(10.0)))
 }
 
