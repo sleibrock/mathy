@@ -138,14 +138,16 @@ pub fn derive(e: Expr, sym: char) -> Expr {
 	    let inner = unpack(i);
 
 	    match inner {
-		Const(_) => con(0.0), 
+		Const(_) => con(0.0),
 		Var(c) if c == sym => exp(var(sym)),
 		f => {
 		    let fp = derive(f.clone(), sym);
 		    mul(fp, exp(f.clone()))
 		}
 	    }
-	}
+	},
+
+	
 
         _ => con(0.0),
     }

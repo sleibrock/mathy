@@ -397,6 +397,9 @@ pub fn imag(x: f64) -> Number { Complex(0.0, x) }
 pub fn complex(x: f64, z: f64) -> Number {
     Complex(x, z)
 }
+pub fn i() -> Number {
+    Complex(0.0, 1.0)
+}
 
 
 #[cfg(test)]
@@ -410,6 +413,11 @@ mod test {
         let r3 = real(5.0);
 
 	assert_eq!(r1+r2, r3);
+    }
+
+    #[test]
+    fn test_standard_i() {
+	assert_eq!(complex(0.0, 2.0), real(2.0) * i());
     }
 
     #[test]

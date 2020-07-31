@@ -425,8 +425,18 @@ pub fn acos(e: Expr)   -> Expr { Acos(pack(e)) }
 pub fn asinh(e: Expr)  -> Expr { Asinh(pack(e)) }
 pub fn acosh(e: Expr)  -> Expr { Acosh(pack(e)) }
 pub fn tan(e: Expr)    -> Expr {
-    let e2 = e.clone();
-    div(sin(e), cos(e2))
+    div(sin(e.clone()), cos(e.clone()))
+}
+pub fn atan(e: Expr) -> Expr {
+    div(asin(e.clone()), acos(e.clone()))
+}
+pub fn tanh(e: Expr) -> Expr {
+    div(sinh(e.clone()), cosh(e.clone()))
+}
+pub fn atanh(e: Expr) -> Expr {
+    // alternate form is 0.5*log(x+1) - 0.5*log(1-x)
+    sub(mul(con(0.5), log(add(e, con(1.0)))),
+	mul(con(0.5), log(sub(con(1.0), e))))
 }
 pub fn ln(e: Expr)     -> Expr { Ln(pack(e)) }
 pub fn log(base: f64, e: Expr) -> Expr {
