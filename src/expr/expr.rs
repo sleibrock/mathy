@@ -75,6 +75,7 @@ impl Expr {
 
     /// Recursively dive into the Expr tree and see
     /// if it contains a Var(c) type where c == s.
+    /// TODO: finish the rest of the expression variants
     pub fn has_var(&self, s: char) -> bool {
         match self {
             Var(x)     => { s == *x },

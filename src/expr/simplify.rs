@@ -8,7 +8,14 @@ use crate::number::number::*;
 pub fn simplify(e: Expr) -> Expr {
     match e {
         Neg(ref i) => {
-            neg(simplify(unpack(i)))
+	    let inner = simplify(unpack(i));
+	    match inner {
+		// two negates would undo each-other
+		// Neg(Neg(x)) => x
+		Neg(ref a) => simplify(unpack(a)), 
+		a => neg(a),
+	    }
+
         },
         Add(ref l, ref r) => {
             let left = simplify(unpack(l));
@@ -46,7 +53,7 @@ pub fn simplify(e: Expr) -> Expr {
 				if a1 == b1 {
 				    con(1.0)
 				} else {
-				   add(pow(a1, power1), pow(b1, power2)) 
+				    add(pow(a1, power1), pow(b1, power2)) 
 				}
 			    },
 			    (Sin(ref a), Cos(ref b)) => {
@@ -55,7 +62,7 @@ pub fn simplify(e: Expr) -> Expr {
 				if a1 == b1 {
 				    con(1.0)
 				} else {
-				   add(pow(a1, power1), pow(b1, power2)) 
+				    add(pow(a1, power1), pow(b1, power2)) 
 				}
 			    }
 			    (a, b) => add(pow(a, power1), pow(b, power2))
@@ -67,7 +74,7 @@ pub fn simplify(e: Expr) -> Expr {
                 (a, b)  => add(a, b),
             }
         }, // end addition addition logic 
-
+	
         Sub(ref l, ref r) => {
             let left = simplify(unpack(l));
             let right = simplify(unpack(r));
@@ -94,11 +101,11 @@ pub fn simplify(e: Expr) -> Expr {
                 (a, b) => sub(simplify(a), simplify(b)),
             }
         }, // end subtraction logic 
-
+	
         Mul(ref l, ref r) => {
             let left = unpack(l);
             let right = unpack(r);
-
+	    
             match (left, right) {
                 (Const(x), Const(y)) => Const(x * y),
                 (Const(x), b) => {
@@ -120,7 +127,7 @@ pub fn simplify(e: Expr) -> Expr {
                     } else if y.real_eq(-1.0) {
                         neg(simplify(a))
                     } else {
-                       mul(Const(y), simplify(a)) 
+			mul(Const(y), simplify(a)) 
                     }
                 },
 		(left, Neg(r)) => {
@@ -212,7 +219,6 @@ pub fn simplify(e: Expr) -> Expr {
 
 	Exp(ref i) => {
 	    let inner = unpack(i);
-
 	    match inner {
 		// e^x and ln(x) are inverse functions
 		Ln(ref a) => {
@@ -221,6 +227,17 @@ pub fn simplify(e: Expr) -> Expr {
 		a => exp(a),
 	    }
 	},
+	// Same as Exp inverse rule, just switched
+	Ln(ref i) => {
+	    let inner = unpack(i);
+	    match inner {
+		Exp(ref a) => {
+		    unpack(a)
+		} 
+		a => ln(a),
+	    }
+	},
+
 
         _ => e,
     }
@@ -264,6 +281,22 @@ mod test {
 	assert_eq!(output, expected);
     }
 
+
+    #[test]
+    fn test_neg_simplify(){
+	let input = neg(neg(var('x')));
+	let output = simplify(input);
+	let expected = var('x');
+	assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_eulers_identity(){
+	let input = add(powf(sin(var('x')), 2.0), powf(cos(var('x')), 2.0));
+	let output = simplify(input);
+	let expected = con(1.0);
+	assert_eq!(output, expected);
+    }
 }
 
 
